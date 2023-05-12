@@ -1,5 +1,0 @@
-dataset:
-  datasource1:
-    data_url: "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
-  datasource2:
-    data_url: "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/"
