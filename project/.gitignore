@@ -1,3 +1,5 @@
 /.idea
 auth.yml
 dataset.ttl
+*.bz2
+*.ttl
