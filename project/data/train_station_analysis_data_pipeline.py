@@ -9,9 +9,13 @@ from urllib.parse import unquote
 import networkx as nx
 import matplotlib.pyplot as plt
 import pickle
+import yaml
+from xml.etree import ElementTree
 
 from rdfpandas.graph import to_dataframe
 from sqlalchemy import create_engine
+from retrying import retry
+from ratelimit import limits, sleep_and_retry
 
 import io
 import pydotplus
@@ -140,21 +144,74 @@ def store_ds1_graph_in_db(dataframe):
     dataframe.to_sql('train_connection_analysis', con=engine, if_exists='replace')
 
 
+@sleep_and_retry
+@retry(wait_fixed=600)
+@limits(calls=30, period=60)
+def call_db_api(subdomain):
+    ds2_url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1"
+    url = ds2_url + subdomain
+    print("request to db api with url: ", url)
+    with open(os.getcwd() + '/auth.yml', 'r') as auth_file:
+        auth_config = yaml.load(auth_file, Loader=yaml.FullLoader)
+    db_client_id = auth_config['auth']['datasource2']['clientId']
+    db_client_secret = auth_config['auth']['datasource2']['clientSecret']
+    headers = {
+        'Accept': 'application/xml',
+        'DB-Client-Id': db_client_id,
+        'DB-API-Key': db_client_secret,
+    }
+    payload = {}
+    response = requests.request("GET", url, headers=headers, data=payload)
+    if response.status_code == 200:
+        print("call to db api successful")
+        return response
+    else:
+        print("call to db api unsuccessful: ", response)
+        raise Exception('API response: {}'.format(response.status_code))
+
+
+def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns, xml_content):
+    tree = ElementTree.fromstring(xml_content)
+    stations_and_its_eva_numbers = {}
+    names = []
+    for station in tree.findall('station'):
+        name = station.get('name')
+        delimiter = "moin:"
+        string_after_moin = name.split(delimiter)
+        words_after_moin = string_after_moin[0].split()
+        # todo: experiment with len(words_after_moin) > 1, other parts of hbf will occur
+        if len(words_after_moin) == 1 or (len(words_after_moin) == 2 and words_after_moin[1] == "Hbf"):
+            if words_after_moin[0] in towns:
+                print("station found: ", name)
+                stations_and_its_eva_numbers[name] = station.get('eva')
+                names.append(words_after_moin[0])
+    print("eva_numbers of stations found that towns are also part of the graph: ", len(stations_and_its_eva_numbers))
+    not_in_list = list(set(towns) - set(names))
+    print("towns from graph that were not found as stations ", not_in_list)
+    return stations_and_its_eva_numbers
+
+
 # actual script
 
-ds1_preprocessed = download_and_decompress_file()
-ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
-with open(os.getcwd() + "/dataset.ttl",
-          "w", encoding='UTF-8') as file:
-    file.write(ds1_preprocessed_ttl_content)
+# ds1_preprocessed = download_and_decompress_file()
+# ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
+# with open(os.getcwd() + "/dataset.ttl",
+#          "w", encoding='UTF-8') as file:
+#    file.write(ds1_preprocessed_ttl_content)
 
 print("ttl file extracted and ready for parsing")
 # parse the ttl file to a pandas data frame
-ds1_graph = parse_ttl_file_to_rdf_graph()
+# ds1_graph = parse_ttl_file_to_rdf_graph()
 
 # for node in ds1_graph.all_nodes():
 #    print(node)
-towns = extract_towns_from_graph(ds1_graph)
+# towns = extract_towns_from_graph(ds1_graph)
+
+# ds1_df = to_dataframe(ds1_graph)
+# pd.set_option('display.max_colwidth', None)
+# print(ds1_df.head(2))
+# visualize(ds1_graph)
+# store_ds1_graph_in_db(ds1_df)
 
 with open(os.getcwd() + '/towns.pkl', 'rb') as f:
     towns = pickle.load(f)
@@ -162,8 +219,22 @@ with open(os.getcwd() + '/towns.pkl', 'rb') as f:
 # print("towns in the dataset: ", towns)
 print("number of listed towns in the dataset: ", len(towns))
 
-ds1_df = to_dataframe(ds1_graph)
-# pd.set_option('display.max_colwidth', None)
-print(ds1_df.head(2))
-# visualize(ds1_graph)
-store_ds1_graph_in_db(ds1_df)
+subdomain_stations_all = '/station/*'
+db_api_stations_all_response = call_db_api(subdomain_stations_all)
+towns_with_eva_numbers = extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns,
+                                                                                                    db_api_stations_all_response.content)
+
+xml_dfs = []
+subdomain_timetable_changes = "/fchg/"
+i = 0
+for eva_number in towns_with_eva_numbers.values():
+    subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + eva_number
+    db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
+    xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content)
+    xml_dfs.append(xml_df_of_response)
+
+ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys(), ignore_index=True)
+ds2_df = ds2_df.unstack(level=0)
+ds2_df = ds2_df.transpose()
+print(ds2_df.head())
+print("Information about stations loaded into dsf2 dataframe")
