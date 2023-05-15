@@ -1,10 +1,22 @@
+import warnings
+
 import pandas as pd
 import requests
 import os
 import bz2
 import re
 import rdflib
+import warnings
+import networkx as nx
+import matplotlib.pyplot as plt
+
 from rdfpandas.graph import to_dataframe
+from sqlalchemy import create_engine
+
+import io
+import pydotplus
+from IPython.display import display, Image
+from rdflib.tools.rdf2dot import rdf2dot
 
 
 # Note: the file seems to be corrupted.
@@ -66,6 +78,21 @@ def escape_urls(match):
     return match.group(1) + re.sub(r'http[^\s]+', r'<\g<0>>', match.group(2))
 
 
+def visualize(g):
+    G = nx.DiGraph()
+
+    for s, p, o in g:
+        G.add_edge(s.n3(), o.n3(), label=p.n3())
+
+    pos = nx.spring_layout(G)
+
+    nx.draw_networkx_nodes(G, pos)
+    nx.draw_networkx_edges(G, pos)
+    nx.draw_networkx_labels(G, pos)
+    nx.draw_networkx_edge_labels(G, pos)
+    plt.show()
+
+
 datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
 ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
 ds1_decompressed = bz2.decompress(ds1_response.content).decode('mbcs')
@@ -83,7 +110,22 @@ ds1_graph = rdflib.Graph()
 ds1_graph.bind('moin', 'http://moin-project.org/data/')
 with open(os.getcwd() + "/dataset.ttl",
           'r', encoding='ANSI') as f:
-    ds1_graph.parse(f, format='turtle')
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        ds1_graph.parse(f, format='turtle')
+print("graph was parsed successfully")
+
+#for node in ds1_graph.all_nodes():
+#    print(node)
+
+subjects = [s for s in ds1_graph.subjects() if str(s).startswith("moin:")]
+subjects_that_represent_towns = dict.fromkeys(subjects)
+print(subjects_that_represent_towns)
+print("number of listed towns in the dataset: ", len(subjects_that_represent_towns))
 
 ds1_df = to_dataframe(ds1_graph)
-print(ds1_df.head())
+# pd.set_option('display.max_colwidth', None)
+print(ds1_df.head(2))
+# visualize(ds1_graph)
+engine = create_engine('sqlite:///train_connection_analysis.sqlite')
+ds1_df.to_sql('train_connection_analysis', con=engine, if_exists='replace')
