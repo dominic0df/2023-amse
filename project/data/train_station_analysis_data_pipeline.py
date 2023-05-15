@@ -1,5 +1,3 @@
-import warnings
-
 import pandas as pd
 import requests
 import os
@@ -7,8 +5,10 @@ import bz2
 import re
 import rdflib
 import warnings
+from urllib.parse import unquote
 import networkx as nx
 import matplotlib.pyplot as plt
+import pickle
 
 from rdfpandas.graph import to_dataframe
 from sqlalchemy import create_engine
@@ -70,6 +70,9 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
     pattern_line_with_moino_connected_to = r'(^\s*moino:connectedTo)(.*?)(?=\n|$)'
     ttl_file_content = re.sub(pattern_line_with_moino_connected_to, escape_urls, ttl_file_content, flags=re.MULTILINE)
 
+    # decode URLs
+    # ttl_file_content = unquote(ttl_file_content)
+
     print("brought content of file into parsable ttl content")
     return ttl_file_content
 
@@ -93,39 +96,74 @@ def visualize(g):
     plt.show()
 
 
-datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
-ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-ds1_decompressed = bz2.decompress(ds1_response.content).decode('mbcs')
-print("data downloaded and decompressed")
+def download_and_decompress_file():
+    datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
+    ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    ds1_decompressed = bz2.decompress(ds1_response.content).decode('UTF-8')
+    print("data downloaded and decompressed")
+    return ds1_decompressed
 
-ds1_decompressed = preprocess_to_a_valid_parsable_ttl_file(ds1_decompressed)
 
+def parse_ttl_file_to_rdf_graph():
+    graph = rdflib.Graph()
+    graph.bind('moin', 'http://moin-project.org/data/')
+    with open(os.getcwd() + "/dataset.ttl",
+              'r', encoding='UTF-8') as f:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            graph.parse(f, format='turtle')
+    print("graph was parsed successfully")
+    return graph
+
+
+def extract_towns_from_graph(graph):
+    subjects = [s for s in graph.subjects() if str(s).startswith("moin:")]
+    subjects_that_represent_towns = dict.fromkeys(subjects)
+    print(subjects_that_represent_towns)
+    print("number of listed towns in the dataset: ", len(subjects_that_represent_towns))
+    towns_in_graph = []
+    for line in subjects_that_represent_towns:
+        for word in line.split():
+            town = word.split("moin:")
+            if len(town) > 1 and town[1]:
+                print(town[1])
+                towns_in_graph.append(town[1])
+
+    # store towns separately for usage as input for the other dataset
+    with open(os.getcwd() + '/towns.pkl', 'wb') as f:
+        pickle.dump(towns_in_graph, f)
+    return towns_in_graph
+
+
+def store_ds1_graph_in_db(dataframe):
+    engine = create_engine('sqlite:///train_connection_analysis.sqlite')
+    dataframe.to_sql('train_connection_analysis', con=engine, if_exists='replace')
+
+
+# actual script
+
+ds1_preprocessed = download_and_decompress_file()
+ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
 with open(os.getcwd() + "/dataset.ttl",
-          "w", encoding='ANSI') as file:
-    file.write(ds1_decompressed)
+          "w", encoding='UTF-8') as file:
+    file.write(ds1_preprocessed_ttl_content)
+
 print("ttl file extracted and ready for parsing")
-
 # parse the ttl file to a pandas data frame
-ds1_graph = rdflib.Graph()
-ds1_graph.bind('moin', 'http://moin-project.org/data/')
-with open(os.getcwd() + "/dataset.ttl",
-          'r', encoding='ANSI') as f:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        ds1_graph.parse(f, format='turtle')
-print("graph was parsed successfully")
+ds1_graph = parse_ttl_file_to_rdf_graph()
 
-#for node in ds1_graph.all_nodes():
+# for node in ds1_graph.all_nodes():
 #    print(node)
+towns = extract_towns_from_graph(ds1_graph)
 
-subjects = [s for s in ds1_graph.subjects() if str(s).startswith("moin:")]
-subjects_that_represent_towns = dict.fromkeys(subjects)
-print(subjects_that_represent_towns)
-print("number of listed towns in the dataset: ", len(subjects_that_represent_towns))
+with open(os.getcwd() + '/towns.pkl', 'rb') as f:
+    towns = pickle.load(f)
+
+# print("towns in the dataset: ", towns)
+print("number of listed towns in the dataset: ", len(towns))
 
 ds1_df = to_dataframe(ds1_graph)
 # pd.set_option('display.max_colwidth', None)
 print(ds1_df.head(2))
 # visualize(ds1_graph)
-engine = create_engine('sqlite:///train_connection_analysis.sqlite')
-ds1_df.to_sql('train_connection_analysis', con=engine, if_exists='replace')
+store_ds1_graph_in_db(ds1_df)
