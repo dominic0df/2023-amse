@@ -6,7 +6,6 @@ import re
 import rdflib
 import warnings
 from urllib.parse import unquote
-import networkx as nx
 import matplotlib.pyplot as plt
 import pickle
 import yaml
@@ -15,15 +14,13 @@ from xml.etree import ElementTree
 from rdfpandas.graph import to_dataframe
 from sqlalchemy import create_engine
 from retrying import retry
-from ratelimit import limits, sleep_and_retry
-
-import io
-import pydotplus
-from IPython.display import display, Image
-from rdflib.tools.rdf2dot import rdf2dot
+from ratelimit import limits
 
 
-# Note: the file seems to be corrupted.
+MOIN = "moin:"
+UTF8 = "UTF-8"
+
+# Note: the datasource1 file seems to be corrupted.
 # It is not parsable with rdflib without this preprocessing steps
 # As the file corrupted file is downloaded directly from the Internet, its corrupted content
 # might change and the pipeline will fail
@@ -33,7 +30,8 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
     ttl_file_content = ttl_file_content.replace('>>', '>')
 
     # remove blank lines
-    ttl_file_content = re.sub(r'^\s*\n', '', ttl_file_content, flags=re.MULTILINE)
+    pattern_for_blank_lines = re.compile(r'^\s*\n', re.MULTILINE)
+    ttl_file_content = re.sub(pattern_for_blank_lines, '', ttl_file_content)
 
     # remove leading < and trailing > from urls
     lines = ttl_file_content.splitlines()
@@ -45,7 +43,7 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
         line_nr += 1
     body = "\n".join(lines[line_nr:])
     # actual removal
-    pattern_to_extract_url = r'<?(http[s]?://[^>\s]+)>?'
+    pattern_to_extract_url = re.compile(r'<?(http[s]?://[^>\s]+)>?', re.MULTILINE)
     ttl_file_content = re.sub(pattern_to_extract_url, lambda m: m.group(1), body)
     ttl_file_content = header + "\n" + ttl_file_content
 
@@ -71,13 +69,13 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
 
     # add a leading < and trailing > to urls if the line begins with moino:connectedTo
     # match the line starting with "moino:connectedTo"
-    pattern_line_with_moino_connected_to = r'(^\s*moino:connectedTo)(.*?)(?=\n|$)'
-    ttl_file_content = re.sub(pattern_line_with_moino_connected_to, escape_urls, ttl_file_content, flags=re.MULTILINE)
+    pattern_line_with_moino_connected_to = re.compile(r'(^\s*moino:connectedTo)(.+?)(?=\n|$)', re.MULTILINE)
+    ttl_file_content = re.sub(pattern_line_with_moino_connected_to, escape_urls, ttl_file_content)
 
     # decode URLs
     # ttl_file_content = unquote(ttl_file_content)
 
-    print("brought content of file into parsable ttl content")
+    print("brought content of datasource1 file into parsable ttl content")
     return ttl_file_content
 
 
@@ -85,25 +83,10 @@ def escape_urls(match):
     return match.group(1) + re.sub(r'http[^\s]+', r'<\g<0>>', match.group(2))
 
 
-def visualize(g):
-    G = nx.DiGraph()
-
-    for s, p, o in g:
-        G.add_edge(s.n3(), o.n3(), label=p.n3())
-
-    pos = nx.spring_layout(G)
-
-    nx.draw_networkx_nodes(G, pos)
-    nx.draw_networkx_edges(G, pos)
-    nx.draw_networkx_labels(G, pos)
-    nx.draw_networkx_edge_labels(G, pos)
-    plt.show()
-
-
 def download_and_decompress_file():
     datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
     ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-    ds1_decompressed = bz2.decompress(ds1_response.content).decode('UTF-8')
+    ds1_decompressed = bz2.decompress(ds1_response.content).decode(UTF8)
     print("data downloaded and decompressed")
     return ds1_decompressed
 
@@ -112,23 +95,23 @@ def parse_ttl_file_to_rdf_graph():
     graph = rdflib.Graph()
     graph.bind('moin', 'http://moin-project.org/data/')
     with open(os.getcwd() + "/dataset.ttl",
-              'r', encoding='UTF-8') as f:
+              'r', encoding=UTF8) as file:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            graph.parse(f, format='turtle')
+            graph.parse(file, format='turtle')
     print("graph was parsed successfully")
     return graph
 
 
 def extract_towns_from_graph(graph):
-    subjects = [s for s in graph.subjects() if str(s).startswith("moin:")]
+    subjects = [s for s in graph.subjects() if str(s).startswith(MOIN)]
     subjects_that_represent_towns = dict.fromkeys(subjects)
     print(subjects_that_represent_towns)
     print("number of listed towns in the dataset: ", len(subjects_that_represent_towns))
     towns_in_graph = []
     for line in subjects_that_represent_towns:
         for word in line.split():
-            town = word.split("moin:")
+            town = word.split(MOIN)
             if len(town) > 1 and town[1]:
                 print(town[1])
                 towns_in_graph.append(town[1])
@@ -139,12 +122,13 @@ def extract_towns_from_graph(graph):
     return towns_in_graph
 
 
-def store_ds1_graph_in_db(dataframe):
+def store_dataframe_in_db(dataframe, table_description):
     engine = create_engine('sqlite:///train_connection_analysis.sqlite')
-    dataframe.to_sql('train_connection_analysis', con=engine, if_exists='replace')
+    dataframe.to_sql(table_description, con=engine, if_exists='replace')
 
 
-@sleep_and_retry
+# DB API Service Plan: 60 requests per minute, 24/7 availability without support
+@retry(stop_max_attempt_number=3, wait_fixed=600, retry_on_result=lambda result: 500 <= result.status_code < 600)
 @retry(wait_fixed=600)
 @limits(calls=30, period=60)
 def call_db_api(subdomain):
@@ -161,13 +145,19 @@ def call_db_api(subdomain):
         'DB-API-Key': db_client_secret,
     }
     payload = {}
-    response = requests.request("GET", url, headers=headers, data=payload)
-    if response.status_code == 200:
+    response = None
+    try:
+        response = requests.request("GET", url, headers=headers, data=payload)
         print("call to db api successful")
         return response
-    else:
-        print("call to db api unsuccessful: ", response)
-        raise Exception('API response: {}'.format(response.status_code))
+    except requests.exceptions.HTTPError as http_error:
+        if response and response.status_code >= 500:
+            print("call to db api unsuccessful - server error occurred: ", response)
+            raise http_error
+        else:
+            print("call to db api unsuccessful - client error occurred: ", response)
+            print("check your input for subdomain ", subdomain)
+            raise http_error
 
 
 def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns, xml_content):
@@ -176,8 +166,7 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
     names = []
     for station in tree.findall('station'):
         name = station.get('name')
-        delimiter = "moin:"
-        string_after_moin = name.split(delimiter)
+        string_after_moin = name.split(MOIN)
         words_after_moin = string_after_moin[0].split()
         # todo: experiment with len(words_after_moin) > 1, other parts of hbf will occur
         if len(words_after_moin) == 1 or (len(words_after_moin) == 2 and words_after_moin[1] == "Hbf"):
@@ -193,31 +182,28 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
 
 # actual script
 
-# ds1_preprocessed = download_and_decompress_file()
-# ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
-# with open(os.getcwd() + "/dataset.ttl",
-#          "w", encoding='UTF-8') as file:
-#    file.write(ds1_preprocessed_ttl_content)
+ds1_preprocessed = download_and_decompress_file()
+ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
+with open(os.getcwd() + "/dataset.ttl",
+          "w", encoding=UTF8) as file:
+    file.write(ds1_preprocessed_ttl_content)
 
 print("ttl file extracted and ready for parsing")
 # parse the ttl file to a pandas data frame
-# ds1_graph = parse_ttl_file_to_rdf_graph()
+ds1_graph = parse_ttl_file_to_rdf_graph()
 
-# for node in ds1_graph.all_nodes():
-#    print(node)
-# towns = extract_towns_from_graph(ds1_graph)
+towns = extract_towns_from_graph(ds1_graph)
 
-# ds1_df = to_dataframe(ds1_graph)
-# pd.set_option('display.max_colwidth', None)
-# print(ds1_df.head(2))
+ds1_df = to_dataframe(ds1_graph)
+print("shape of ds1_df ", ds1_df.shape)
 # visualize(ds1_graph)
-# store_ds1_graph_in_db(ds1_df)
+store_dataframe_in_db(ds1_df, 'connection_time_graph')
+print("information of datasource1 loaded to database")
 
 with open(os.getcwd() + '/towns.pkl', 'rb') as f:
     towns = pickle.load(f)
 
-# print("towns in the dataset: ", towns)
-print("number of listed towns in the dataset: ", len(towns))
+print("number of listed towns in dataset 1: ", len(towns))
 
 subdomain_stations_all = '/station/*'
 db_api_stations_all_response = call_db_api(subdomain_stations_all)
@@ -232,9 +218,9 @@ for eva_number in towns_with_eva_numbers.values():
     db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
     xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content)
     xml_dfs.append(xml_df_of_response)
+    # print(xml_df_of_response.shape)
 
-ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys(), ignore_index=True)
-ds2_df = ds2_df.unstack(level=0)
-ds2_df = ds2_df.transpose()
-print(ds2_df.head())
-print("Information about stations loaded into dsf2 dataframe")
+ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys())
+print("shape of ds2_df ", ds2_df.shape)
+store_dataframe_in_db(ds2_df, 'timetable_for_stations')
+print("information of datasource 2 loaded to database")
