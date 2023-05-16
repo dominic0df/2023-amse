@@ -43,7 +43,7 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
         line_nr += 1
     body = "\n".join(lines[line_nr:])
     # actual removal
-    pattern_to_extract_url = re.compile(r'<?(http[s]?://[^>\s]+)>?', re.MULTILINE)
+    pattern_to_extract_url = re.compile(r'<?(https?://[^>\s]+)>?', re.MULTILINE)
     ttl_file_content = re.sub(pattern_to_extract_url, lambda m: m.group(1), body)
     ttl_file_content = header + "\n" + ttl_file_content
 
