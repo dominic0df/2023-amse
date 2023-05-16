@@ -83,7 +83,9 @@ def escape_urls(match):
     return match.group(1) + re.sub(r'http[^\s]+', r'<\g<0>>', match.group(2))
 
 
-def download_and_decompress_file():
+@retry(stop_max_attempt_number=3, wait_fixed=600, retry_on_result=lambda result: 500 <= result.status_code < 600)
+@retry(wait_fixed=600)
+def download_and_decompress_ds1_file():
     datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
     ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
     ds1_decompressed = bz2.decompress(ds1_response.content).decode(UTF8)
@@ -182,7 +184,7 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
 
 # actual script
 
-ds1_preprocessed = download_and_decompress_file()
+ds1_preprocessed = download_and_decompress_ds1_file()
 ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
 with open(os.getcwd() + "/dataset.ttl",
           "w", encoding=UTF8) as file:
