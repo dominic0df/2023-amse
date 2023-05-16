@@ -83,8 +83,7 @@ def escape_urls(match):
     return match.group(1) + re.sub(r'http[^\s]+', r'<\g<0>>', match.group(2))
 
 
-@retry(stop_max_attempt_number=3, wait_fixed=600, retry_on_result=lambda result: 500 <= result.status_code < 600)
-@retry(wait_fixed=600)
+@retry(stop_max_attempt_number=3, wait_fixed=600)
 def download_and_decompress_ds1_file():
     datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
     ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
