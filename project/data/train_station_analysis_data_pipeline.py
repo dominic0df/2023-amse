@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 import requests
 import os
@@ -14,11 +16,11 @@ from xml.etree import ElementTree
 from rdfpandas.graph import to_dataframe
 from sqlalchemy import create_engine
 from retrying import retry
-from ratelimit import limits
-
+from ratelimit import limits, RateLimitException
 
 MOIN = "moin:"
 UTF8 = "UTF-8"
+
 
 # Note: the datasource1 file seems to be corrupted.
 # It is not parsable with rdflib without this preprocessing steps
@@ -130,8 +132,24 @@ def store_dataframe_in_db(dataframe, table_description):
 
 # DB API Service Plan: 60 requests per minute, 24/7 availability without support
 @retry(stop_max_attempt_number=3, wait_fixed=600, retry_on_result=lambda result: 500 <= result.status_code < 600)
-@retry(wait_fixed=600)
-@limits(calls=30, period=60)
+@limits(calls=60, period=60)
+def make_api_call(url, headers):
+    payload = {}
+    response = None
+    try:
+        response = requests.request("GET", url, headers=headers, data=payload)
+        print("call to db api successful")
+        return response
+    except requests.exceptions.HTTPError as http_error:
+        if response and response.status_code >= 500:
+            print("call to db api unsuccessful - server error occurred: ", response)
+            raise http_error
+        else:
+            print("call to db api unsuccessful - client error occurred: ", response)
+            print("check your input for url ", url)
+            raise http_error
+
+
 def call_db_api(subdomain):
     ds2_url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1"
     url = ds2_url + subdomain
@@ -145,20 +163,13 @@ def call_db_api(subdomain):
         'DB-Client-Id': db_client_id,
         'DB-API-Key': db_client_secret,
     }
-    payload = {}
-    response = None
-    try:
-        response = requests.request("GET", url, headers=headers, data=payload)
-        print("call to db api successful")
-        return response
-    except requests.exceptions.HTTPError as http_error:
-        if response and response.status_code >= 500:
-            print("call to db api unsuccessful - server error occurred: ", response)
-            raise http_error
-        else:
-            print("call to db api unsuccessful - client error occurred: ", response)
-            print("check your input for subdomain ", subdomain)
-            raise http_error
+
+    while True:
+        try:
+            return make_api_call(url, headers)
+        except RateLimitException:
+            print("too many api calls - sleep for 60 seconds")
+            time.sleep(60)
 
 
 def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns, xml_content):
@@ -196,13 +207,12 @@ ds1_graph = parse_ttl_file_to_rdf_graph()
 towns = extract_towns_from_graph(ds1_graph)
 
 ds1_df = to_dataframe(ds1_graph)
-print("shape of ds1_df ", ds1_df.shape)
-# visualize(ds1_graph)
+# print("shape of ds1_df ", ds1_df.shape)
 store_dataframe_in_db(ds1_df, 'connection_time_graph')
 print("information of datasource1 loaded to database")
 
-with open(os.getcwd() + '/towns.pkl', 'rb') as f:
-    towns = pickle.load(f)
+# with open(os.getcwd() + '/towns.pkl', 'rb') as f:
+#    towns = pickle.load(f)
 
 print("number of listed towns in dataset 1: ", len(towns))
 
@@ -217,11 +227,14 @@ i = 0
 for eva_number in towns_with_eva_numbers.values():
     subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + eva_number
     db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
-    xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content)
+    xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content, xpath='.//s/m')
     xml_dfs.append(xml_df_of_response)
     # print(xml_df_of_response.shape)
 
 ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys())
-print("shape of ds2_df ", ds2_df.shape)
+pd.options.display.max_colwidth = 100
+pd.options.display.max_columns = 20
 store_dataframe_in_db(ds2_df, 'timetable_for_stations')
 print("information of datasource 2 loaded to database")
+# print("shape of ds2_df ", ds2_df.shape)
+# print(ds2_df.head(5))
