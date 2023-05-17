@@ -6,7 +6,6 @@ import os
 import bz2
 import re
 import rdflib
-import warnings
 from urllib.parse import unquote
 import matplotlib.pyplot as plt
 import pickle
@@ -95,12 +94,21 @@ def download_and_decompress_ds1_file():
 
 
 def parse_ttl_file_to_rdf_graph():
+    # prefixes are still not loaded correctly - so the URIs are not correct
     graph = rdflib.Graph()
-    graph.bind('moin', 'http://moin-project.org/data/')
+    moin = rdflib.Namespace("http://moin-project.org/data/")
+    graph.bind("moin", moin)
+    moino = rdflib.Namespace("http://moin-project.org/ontology/")
+    graph.bind("moino", moino)
+    schema = rdflib.Namespace("http://schema.org/")
+    graph.bind("schema", schema)
+    wd = rdflib.Namespace("http://www.wikidata.org/entity/")
+    graph.bind("wd", wd)
+    wdt = rdflib.Namespace("http://www.wikidata.org/prop/direct/")
+    graph.bind("wdt", wdt)
+
     with open(os.getcwd() + "/dataset.ttl",
               'r', encoding=UTF8) as file:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
             graph.parse(file, format='turtle')
     print("graph was parsed successfully")
     return graph
@@ -116,7 +124,7 @@ def extract_towns_from_graph(graph):
         for word in line.split():
             town = word.split(MOIN)
             if len(town) > 1 and town[1]:
-                print(town[1])
+                # print(town[1])
                 towns_in_graph.append(town[1])
 
     # store towns separately for usage as input for the other dataset
@@ -180,14 +188,19 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
         name = station.get('name')
         string_after_moin = name.split(MOIN)
         words_after_moin = string_after_moin[0].split()
-        # todo: experiment with len(words_after_moin) > 1, other parts of hbf will occur
+        # experiment with len(words_after_moin) > 1, other parts of hbf will occur
         if len(words_after_moin) == 1 or (len(words_after_moin) == 2 and words_after_moin[1] == "Hbf"):
             if words_after_moin[0] in towns:
-                print("station found: ", name)
+                # print("station found: ", name)
                 stations_and_its_eva_numbers[name] = station.get('eva')
                 names.append(words_after_moin[0])
     print("eva_numbers of stations found that towns are also part of the graph: ", len(stations_and_its_eva_numbers))
     not_in_list = list(set(towns) - set(names))
+    """
+    the stations that are not found have special names that can not be differentiated easily from stations we are not interested in.
+    F.e. Ratingen Ost is not found as the station of Ratingen, searching for Ost would also result in other <town Ost> stations.
+    The project could be extended to multiple stations of a town, but we will see. 
+    """
     print("towns from graph that were not found as stations ", not_in_list)
     return stations_and_its_eva_numbers
 
@@ -206,10 +219,15 @@ ds1_graph = parse_ttl_file_to_rdf_graph()
 
 towns = extract_towns_from_graph(ds1_graph)
 
+pd.options.display.max_colwidth = 100
+pd.options.display.max_columns = 20
 ds1_df = to_dataframe(ds1_graph)
 # print("shape of ds1_df ", ds1_df.shape)
 store_dataframe_in_db(ds1_df, 'connection_time_graph')
 print("information of datasource1 loaded to database")
+keys = ds1_df.keys()
+print("keys: ", keys)
+print(ds1_df.head(2))
 
 # with open(os.getcwd() + '/towns.pkl', 'rb') as f:
 #    towns = pickle.load(f)
@@ -232,8 +250,6 @@ for eva_number in towns_with_eva_numbers.values():
     # print(xml_df_of_response.shape)
 
 ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys())
-pd.options.display.max_colwidth = 100
-pd.options.display.max_columns = 20
 store_dataframe_in_db(ds2_df, 'timetable_for_stations')
 print("information of datasource 2 loaded to database")
 # print("shape of ds2_df ", ds2_df.shape)
