@@ -109,7 +109,7 @@ def parse_ttl_file_to_rdf_graph():
 
     with open(os.getcwd() + "/dataset.ttl",
               'r', encoding=UTF8) as file:
-            graph.parse(file, format='turtle')
+        graph.parse(file, format='turtle')
     print("graph was parsed successfully")
     return graph
 
@@ -205,52 +205,51 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
     return stations_and_its_eva_numbers
 
 
+def extract_transform_load_datasource1():
+    ds1_preprocessed = download_and_decompress_ds1_file()
+    ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
+    with open(os.getcwd() + "/dataset.ttl",
+              "w", encoding=UTF8) as file:
+        file.write(ds1_preprocessed_ttl_content)
+    print("ttl file extracted and ready for parsing")
+    # parse the ttl file to a pandas data frame
+    ds1_graph = parse_ttl_file_to_rdf_graph()
+    towns = extract_towns_from_graph(ds1_graph)
+    ds1_df = to_dataframe(ds1_graph)
+    # print("shape of ds1_df ", ds1_df.shape)
+    store_dataframe_in_db(ds1_df, 'connection_time_graph')
+    print("information of datasource1 loaded to database")
+    keys = ds1_df.keys()
+    print("keys: ", keys)
+    print(ds1_df.head(2))
+    print("number of listed towns in dataset 1: ", len(towns))
+    return towns
+
+
+def extract_transform_load_datasource2(towns):
+    subdomain_stations_all = '/station/*'
+    db_api_stations_all_response = call_db_api(subdomain_stations_all)
+    towns_with_eva_numbers = extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns,
+                                                                                                        db_api_stations_all_response.content)
+    xml_dfs = []
+    subdomain_timetable_changes = "/fchg/"
+    for eva_number in towns_with_eva_numbers.values():
+        subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + eva_number
+        db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
+        xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content, xpath='.//s/m')
+        xml_dfs.append(xml_df_of_response)
+        # print(xml_df_of_response.shape)
+    ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys())
+    store_dataframe_in_db(ds2_df, 'timetable_for_stations')
+    print("information of datasource 2 loaded to database")
+    # print("shape of ds2_df ", ds2_df.shape)
+    # print(ds2_df.head(5))
+
+
 # actual script
-
-ds1_preprocessed = download_and_decompress_ds1_file()
-ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
-with open(os.getcwd() + "/dataset.ttl",
-          "w", encoding=UTF8) as file:
-    file.write(ds1_preprocessed_ttl_content)
-
-print("ttl file extracted and ready for parsing")
-# parse the ttl file to a pandas data frame
-ds1_graph = parse_ttl_file_to_rdf_graph()
-
-towns = extract_towns_from_graph(ds1_graph)
-
-pd.options.display.max_colwidth = 100
-pd.options.display.max_columns = 20
-ds1_df = to_dataframe(ds1_graph)
-# print("shape of ds1_df ", ds1_df.shape)
-store_dataframe_in_db(ds1_df, 'connection_time_graph')
-print("information of datasource1 loaded to database")
-keys = ds1_df.keys()
-print("keys: ", keys)
-print(ds1_df.head(2))
-
+# pd.options.display.max_colwidth = 100
+# pd.options.display.max_columns = 20
+towns = extract_transform_load_datasource1()
 # with open(os.getcwd() + '/towns.pkl', 'rb') as f:
 #    towns = pickle.load(f)
-
-print("number of listed towns in dataset 1: ", len(towns))
-
-subdomain_stations_all = '/station/*'
-db_api_stations_all_response = call_db_api(subdomain_stations_all)
-towns_with_eva_numbers = extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns,
-                                                                                                    db_api_stations_all_response.content)
-
-xml_dfs = []
-subdomain_timetable_changes = "/fchg/"
-i = 0
-for eva_number in towns_with_eva_numbers.values():
-    subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + eva_number
-    db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
-    xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content, xpath='.//s/m')
-    xml_dfs.append(xml_df_of_response)
-    # print(xml_df_of_response.shape)
-
-ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys())
-store_dataframe_in_db(ds2_df, 'timetable_for_stations')
-print("information of datasource 2 loaded to database")
-# print("shape of ds2_df ", ds2_df.shape)
-# print(ds2_df.head(5))
+extract_transform_load_datasource2(towns)
