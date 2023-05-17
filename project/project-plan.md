@@ -33,9 +33,10 @@ API for passenger information for train stations operated by DB Station&Service 
 <!-- List of work packages ordered sequentially, each pointing to an issue with more details. -->
 
 1. Automated Data Pipeline [https://github.com/dominic0df/2023-amse/issues/1]
-2. Automated Testing [https://github.com/dominic0df/2023-amse/issues/2]
-3. Contineous Integration [https://github.com/dominic0df/2023-amse/issues/3]
-4. Deployment with GitHub pages [https://github.com/dominic0df/2023-amse/issues/4]
-5. Identify regions with good/bad train connections [https://github.com/dominic0df/2023-amse/issues/5]
+2. Improve data processing to a reasonable format for datasource1 [https://github.com/dominic0df/2023-amse/issues/6]
+3. Automated Testing [https://github.com/dominic0df/2023-amse/issues/2]
+4. Contineous Integration [https://github.com/dominic0df/2023-amse/issues/3]
+5. Deployment with GitHub pages [https://github.com/dominic0df/2023-amse/issues/4]
+6. Identify regions with good/bad train connections [https://github.com/dominic0df/2023-amse/issues/5]
 
 [i1]: https://github.com/jvalue/2023-amse-template/issues/1
