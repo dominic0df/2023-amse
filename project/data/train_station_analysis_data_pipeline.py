@@ -145,11 +145,11 @@ def rearrange_graph_to_origin_destination_trip_information_format(graph):
         ORDER BY ?source ?connectedTo
         """
 
-    # origin_destination_trips = graph.query(query_origin_destination_trips)
+    origin_destination_trips = graph.query(query_origin_destination_trips)
     # for row in qres:
     #    print(row)
     # print("len qres ", len(origin_destination_trips))
-    return graph
+    return origin_destination_trips
 
 
 def extract_transform_load_datasource1():
@@ -269,6 +269,7 @@ def download_ds3_file_and_load_to_df():
     return ds3_df
 
 
+# experimental
 def extract_transform_load_datasource3():
     ds3_df = download_ds3_file_and_load_to_df()
     print(ds3_df.head())
