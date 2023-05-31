@@ -4,4 +4,3 @@ dataset.ttl
 *.bz2
 *.ttl
 *.sqlite
-*.pkl
