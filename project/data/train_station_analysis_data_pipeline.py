@@ -18,10 +18,12 @@ from ratelimit import limits, RateLimitException
 
 # ttl file constants
 MOIN_PREFIX = "moin:"
+MOINO_CONNECTED_TO = "moino:connectedTo"
+MOIN_URL_PREFIX = "http://moin-project.org/data/"
 FIRST_LINE_DEFAUL_PREFIX = "@prefix : <#> .\n"
 
 # namespaces
-MOIN = rdflib.Namespace("http://moin-project.org/data/")
+MOIN_NAMESPACE = rdflib.Namespace("http://moin-project.org/data/")
 MOINO = rdflib.Namespace("http://moin-project.org/ontology/")
 SCHEMA = rdflib.Namespace("http://schema.org/")
 WD = rdflib.Namespace("http://www.wikidata.org/entity/")
@@ -65,93 +67,29 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
     # see https://stackoverflow.com/questions/17616463/error-in-serializing-notation3-file-into-rdfxml-format-in-python
     ttl_file_content = FIRST_LINE_DEFAUL_PREFIX + ttl_file_content
 
-    # pattern_for_moino_connected_to_escape = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\.)', re.DOTALL)
-    # ttl_file_content = pattern_for_moino_connected_to_escape.sub(r'\1 [ moino:connectedTo \2 ]\3', ttl_file_content)
+    # escape urls
+    ttl_file_content = re.sub(r'(?<!<)(https?://\S+)(?!>)', r'<\1>', ttl_file_content)
 
-    # pattern = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\\]\.\n)', re.DOTALL)
-
-    # Perform the substitutions using the compiled pattern
-    # ttl_file_content = pattern.sub(r'\1 [ moino:connectedTo \2 ]] .\n', ttl_file_content)
-    # time problem https://github.com/RDFLib/rdflib/issues/2148
-
-    # substitute leading << and trailing >> by < and > from urls
-    # lines = ttl_file_content.splitlines()
-    # moin_to_be_closed = False
-    # pattern_moino_connected_to = re.compile(r'(moino:connectedTo)\s+(moin:\w+)')
-    # pattern_for_closing_bracket = re.compile(r'\](?=\.)?$')
-    # for i in range(len(lines)):
-    #    if moin_to_be_closed and lines[i].strip() == 0:
-    #        lines[i - 1] = pattern_for_closing_bracket.sub(r']]', lines[i - 1])
-    #       moin_to_be_closed = False
-    #   elif lines[i].startswith(MOIN_PREFIX):
-    #       moin_to_be_closed = True
-    #       lines[i] = pattern_moino_connected_to.sub(r'\1 [ \1 \2', lines[i])
-    # ttl_file_content = "\n".join(lines)
+    # relate origins and destinations with their associated trips in the turtle file
+    lines = ttl_file_content.splitlines()
+    moin_to_be_closed = False
+    prev_line = ''
+    for i, line in enumerate(lines):
+        stripped_line = line.strip()
+        if moin_to_be_closed and prev_line.strip() == '] .':
+            print("ends with: ", lines[i - 1])
+            lines[i - 1] = lines[i - 1].replace('] .', ']] .')
+            moin_to_be_closed = False
+        elif stripped_line.startswith(MOIN_PREFIX + " " + MOINO_CONNECTED_TO) or stripped_line.startswith('<' + MOIN_URL_PREFIX + "> " + MOINO_CONNECTED_TO):
+            print("starts with ", line)
+            moin_to_be_closed = True
+            lines[i] = line.replace(MOINO_CONNECTED_TO, MOINO_CONNECTED_TO + " [ " + MOINO_CONNECTED_TO)
+        prev_line = line
+    ttl_file_content = "\n".join(lines)
 
     # remove blank lines
     pattern_for_blank_lines = re.compile(r'^\s*\n', re.MULTILINE)
     ttl_file_content = re.sub(pattern_for_blank_lines, '', ttl_file_content)
-
-    # actual_connected_to = ""
-    # moino_has_trip = MOINO + "hasTrip"
-    # offset = 0
-    # for i in range(len(lines)):
-    #    if lines[i].startswith(MOIN_PREFIX):
-    #        words = lines[i].split()
-    #        print(words)
-    #        actual_connected_to = words[2]
-    #    elif lines[i].startswith(moino_has_trip):
-    #        connected_to = "moino:connectedTo " + actual_connected_to + " ;"
-    #        lines.insert(i + offset + 1, connected_to)
-    #       offset += 1
-    # ttl_file_content = "\n".join(lines)
-    # print(ttl_file_content)
-    # print("offset ", offset)
-    # line_nr = 0
-    # header = ""
-    # do not remove leading < and trailing > from the header
-    # while lines[line_nr].startswith('@prefix'):
-    #    header = header + "\n" + lines[line_nr]
-    #    line_nr += 1
-    # body = "\n".join(lines[line_nr:])
-    # actual removal
-    # pattern_to_extract_url = re.compile(r'<?(<https?://[^>\s]+>)>?', re.MULTILINE)
-    # ttl_file_content = re.sub(pattern_to_extract_url, lambda m: m.group(1), body)
-    # ttl_file_content = header + "\n" + ttl_file_content
-
-    # ttl_file_content = ttl_file_content.replace('<<', '<')
-    # ttl_file_content = ttl_file_content.replace('>>', '>')
-
-    # add a leading < and trailing > to a line if the url is de.wikipedia.org
-    # pattern_to_find_wiki_urls = re.compile(r'(https?://de\.wikipedia\.org\S*)')
-    # ttl_file_content = re.sub(pattern_to_find_wiki_urls, r'<\g<0>>', ttl_file_content)
-
-    # add a leading < and trailing > if the line starts with an url without leading < and trailing >
-    # pattern_for_leading_urls = re.compile(r'^(https?://\S+)', re.MULTILINE)
-    # ttl_file_content = re.sub(pattern_for_leading_urls, r'<\1>', ttl_file_content)
-
-    # add a leading < to a line if it starts with wd:
-    # pattern_for_wd = re.compile(r'^(wd:\S.*)$', re.MULTILINE)
-    # ttl_file_content = re.sub(pattern_for_wd, r'<\g<0>', ttl_file_content)
-
-    # add a leading < and trailing > to a line with moin:
-    # pattern_for_moin = re.compile(r'^(moin:\S.*)$', re.MULTILINE)
-    # ttl_file_content = re.sub(pattern_for_moin, r'<\g<0>>', ttl_file_content)
-
-    # add a leading < and trailing > to an url if the line begins with schema:about url
-    # pattern_for_schema_about_url = re.compile(r'(schema:about\s+)(\S+)', re.MULTILINE)
-    # ttl_file_content = re.sub(pattern_for_schema_about_url, r'\1<\2>', ttl_file_content)
-
-    # escape urls
-    ttl_file_content = re.sub(r'(?<!<)(https?://\S+)(?!>)', r'<\1>', ttl_file_content)
-
-    # add a leading < and trailing > to urls if the line begins with moino:connectedTo
-    # match the line starting with "moino:connectedTo"
-    # pattern_line_with_moino_connected_to = re.compile(r'(^\s*moino:connectedTo)(.+?)(?=\n|$)', re.MULTILINE)
-    # ttl_file_content = re.sub(pattern_line_with_moino_connected_to, escape_urls, ttl_file_content)
-
-    # decode URLs
-    # ttl_file_content = unquote(ttl_file_content)
 
     print("brought content of datasource1 file into parsable ttl content")
     return ttl_file_content
@@ -160,7 +98,7 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
 def parse_ttl_file_to_rdf_graph():
     # prefixes are still not loaded correctly - so the URIs are not correct
     graph = rdflib.Graph()
-    graph.bind("moin", MOIN)
+    graph.bind("moin", MOIN_NAMESPACE)
     graph.bind("moino", MOINO)
     graph.bind("schema", SCHEMA)
     graph.bind("wdt", WDT)
@@ -176,8 +114,8 @@ def parse_ttl_file_to_rdf_graph():
 def extract_towns_from_graph(graph):
     subjects_that_represent_towns = set()
     for s, p, o in graph:
-        if s.startswith(MOIN):
-            town_name = s.replace(MOIN, "")
+        if s.startswith(MOIN_NAMESPACE):
+            town_name = s.replace(MOIN_NAMESPACE, "")
             town_name = urllib.parse.unquote(town_name)
             subjects_that_represent_towns.add(town_name)
     print(subjects_that_represent_towns)
@@ -211,8 +149,6 @@ def rearrange_graph_to_origin_destination_trip_information_format(graph):
     # for row in qres:
     #    print(row)
     # print("len qres ", len(origin_destination_trips))
-    # for s, p, o in graph.triples((MOIN.Bremerhaven, None, None)):
-    # print(s, p, o)
     return graph
 
 
