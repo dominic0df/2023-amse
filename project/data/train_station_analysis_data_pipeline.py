@@ -136,20 +136,20 @@ def rearrange_graph_to_origin_destination_trip_information_format(graph):
     query_origin_destination_trips = """
         SELECT ?source ?connectedTo ?duration ?transportType
         WHERE {
-          ?source moino:connectedTo ?connectedTo;
+          ?source moino:connectedTo [ ?connectedTo;
                   moino:hasTrip [
                     moino:duration ?duration ;
                     moino:transportType ?transportType
-                  ] .
+                  ]] .
           }
         ORDER BY ?source ?connectedTo
         """
 
-    origin_destination_trips = graph.query(query_origin_destination_trips)
+    # origin_destination_trips = graph.query(query_origin_destination_trips)
     # for row in qres:
     #    print(row)
-    # print("len qres ", len(origin_destination_trips))
-    return origin_destination_trips
+    # print("len qres ", len(query_origin_destination_trips))
+    return graph
 
 
 def extract_transform_load_datasource1():
