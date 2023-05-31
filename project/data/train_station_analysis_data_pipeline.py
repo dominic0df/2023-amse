@@ -1,3 +1,4 @@
+import io
 import time
 
 import pandas as pd
@@ -36,6 +37,8 @@ FIRST_LINE_DEFAUL_PREFIX = "@prefix : <#> .\n"
 # As the file corrupted file is downloaded directly from the Internet, its corrupted content
 # might change and the pipeline will fail
 def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
+    print("started preprocessing ttl file")
+
     # remove to many << and >>
     ttl_file_content = ttl_file_content.replace('<<', '')
     ttl_file_content = ttl_file_content.replace('>>', ';')
@@ -44,21 +47,33 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
     # see https://stackoverflow.com/questions/17616463/error-in-serializing-notation3-file-into-rdfxml-format-in-python
     ttl_file_content = FIRST_LINE_DEFAUL_PREFIX + ttl_file_content
 
+    # pattern_for_moino_connected_to_escape = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\.)', re.DOTALL)
+    # ttl_file_content = pattern_for_moino_connected_to_escape.sub(r'\1 [ moino:connectedTo \2 ]\3', ttl_file_content)
+
+    #pattern = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\\]\.\n)', re.DOTALL)
+
+    # Perform the substitutions using the compiled pattern
+    #ttl_file_content = pattern.sub(r'\1 [ moino:connectedTo \2 ]] .\n', ttl_file_content)
+    # time problem https://github.com/RDFLib/rdflib/issues/2148
+
+    # substitute leading << and trailing >> by < and > from urls
+    #lines = ttl_file_content.splitlines()
+    #moin_to_be_closed = False
+    #pattern_moino_connected_to = re.compile(r'(moino:connectedTo)\s+(moin:\w+)')
+    #pattern_for_closing_bracket = re.compile(r'\](?=\.)?$')
+    #for i in range(len(lines)):
+    #    if moin_to_be_closed and lines[i].strip() == 0:
+    #        lines[i - 1] = pattern_for_closing_bracket.sub(r']]', lines[i - 1])
+     #       moin_to_be_closed = False
+     #   elif lines[i].startswith(MOIN_PREFIX):
+     #       moin_to_be_closed = True
+     #       lines[i] = pattern_moino_connected_to.sub(r'\1 [ \1 \2', lines[i])
+    #ttl_file_content = "\n".join(lines)
+
     # remove blank lines
     pattern_for_blank_lines = re.compile(r'^\s*\n', re.MULTILINE)
     ttl_file_content = re.sub(pattern_for_blank_lines, '', ttl_file_content)
 
-    # pattern_for_moino_connected_to_escape = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\.)', re.DOTALL)
-    # ttl_file_content = pattern_for_moino_connected_to_escape.sub(r'\1 [ moino:connectedTo \2 ]\3', ttl_file_content)
-
-    pattern = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\\]\.\n)', re.DOTALL)
-
-    # Perform the substitutions using the compiled pattern
-    ttl_file_content = pattern.sub(r'\1 [ moino:connectedTo \2 ]] .\n', ttl_file_content)
-    # time problem https://github.com/RDFLib/rdflib/issues/2148
-
-    # substitute leading << and trailing >> by < and > from urls
-    # lines = ttl_file_content.splitlines()
     # actual_connected_to = ""
     # moino_has_trip = MOINO + "hasTrip"
     # offset = 0
@@ -135,6 +150,13 @@ def download_and_decompress_ds1_file():
     ds1_decompressed = bz2.decompress(ds1_response.content).decode(UTF8)
     print("data downloaded and decompressed")
     return ds1_decompressed
+
+
+@retry(stop_max_attempt_number=3, wait_fixed=600)
+def download_ds3_file_and_load_to_df():
+    datasource3_url = "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-kreis-neuss-ladesaulen-in-deutschland/exports/json"
+    ds3_df =  pd.read_csv(datasource3_url)
+    return ds3_df
 
 
 def parse_ttl_file_to_rdf_graph():
@@ -306,13 +328,23 @@ def extract_transform_load_datasource2(towns):
     # print(ds2_df.head(5))
 
 
+def extract_transform_load_datasource3():
+    ds3_df = download_ds3_file_and_load_to_df()
+    print(ds3_df.head())
+    store_dataframe_in_db(ds3_df, 'e_car_charging_stations')
+
+
 # actual script
 pd.options.display.max_colwidth = 100
 pd.options.display.max_columns = 20
-towns = extract_transform_load_datasource1()
+#towns = extract_transform_load_datasource1()
 # with open(os.getcwd() + '/towns.pkl', 'rb') as f:
 #    towns = pickle.load(f)
 # extract_transform_load_datasource2(towns)
+# extract_transform_load_datasource3()
+#datasource3_url = "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-kreis-neuss-ladesaulen-in-deutschland/exports/json"
+#ds3_df = pd.read_csv(datasource3_url)
+#ds3_df.head(2)
 
 input_text = '''
 moin:Bremerhaven moino:connectedTo moin:Marl ;
@@ -349,29 +381,25 @@ moin:Dortmund moino:connectedTo moin:Karlsruhe ;
                    ] .
 '''
 
+
 # output_text = re.sub(r'(moin:Bremerhaven moino:connectedTo) (moin:Marl)', r'\1 [\2]', input_text)
-
-
 # print(output_text)
-
-def add_brackets(match):
-    return '[' + match.group(0) + ']'
 
 
 # new_turtle_file = re.sub(r'\[.*?\]', add_brackets, input_text)
 # print(new_turtle_file)
 # new_turtle_file = re.sub(r'moin:Bremerhaven moino:connectedTo.*?(\.)', r'moin:Bremerhaven moino:connectedTo [\g<0>]', input_text, flags=re.DOTALL)
 # new_turtle_file = re.sub(r'(moin:Bremerhaven moino:connectedTo)(.*?)(\.)', r'\1 [\2 ]\3', input_text, flags=re.DOTALL)
-#new_turtle_file = re.sub(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\.)', r'\1 [ moino:connectedTo \2 ]\3', input_text,
+# new_turtle_file = re.sub(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(\.)', r'\1 [ moino:connectedTo \2 ]\3', input_text,
 #                         flags=re.DOTALL)
-#print(new_turtle_file)
+# print(new_turtle_file)
 
 # Compile the regex pattern
 pattern = re.compile(r'(moin:[^ ;]+ moino:connectedTo)(.*?)(] \.\n)', re.DOTALL)
 
 # Perform the substitutions using the compiled pattern
 new_turtle_file = pattern.sub(r'\1 [ moino:connectedTo \2 ]\3', input_text)
-print(new_turtle_file)
+# print(new_turtle_file)
 
 # turtle_file = "moin:Bremerhaven moino:connectedTo moin:Marl ; moino:hasTrip [ moino:duration \"PT322M\"^^xsd:duration ; moino:endTime \"15:50:00\"^^xsd:time ; moino:startTime \"10:28:00\"^^xsd:time ; moino:transportType moino:train ] ; moino:hasTrip [ moino:duration \"PT385M\"^^xsd:duration ; moino:endTime \"17:07:00\"^^xsd:time ; moino:startTime \"10:42:00\"^^xsd:time ; moino:transportType moino:train ] ; moino:hasTrip [ moino:duration \"PT320M\"^^xsd:duration ; moino:endTime \"16:02:00\"^^xsd:time ; moino:startTime \"10:42:00\"^^xsd:time ; moino:transportType moino:train ] ."
 
@@ -379,3 +407,50 @@ print(new_turtle_file)
 # new_turtle_file = re.sub(r"(\[.*\])", r"\1 ]", new_turtle_file)
 
 # print(new_turtle_file)
+
+# Multiline string
+multiline_string = '''@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+<< moin:Bremerhaven moino:connectedTo moin:Marl >>
+        moino:hasTrip  [ moino:duration       "PT322M"^^xsd:duration ;
+                         moino:endTime        "15:50:00"^^xsd:time ;
+                         moino:startTime      "10:28:00"^^xsd:time ;
+                         moino:transportType  moino:train
+                       ] ;
+        moino:hasTrip  [ moino:duration       "PT385M"^^xsd:duration ;
+                         moino:endTime        "17:07:00"^^xsd:time ;
+                         moino:startTime      "10:42:00"^^xsd:time ;
+                         moino:transportType  moino:train
+                       ] ;
+        moino:hasTrip  [ moino:duration       "PT320M"^^xsd:duration ;
+                         moino:endTime        "16:02:00"^^xsd:time ;
+                         moino:startTime      "10:42:00"^^xsd:time ;
+                         moino:transportType  moino:train
+                       ] ;
+        moino:hasTrip  [ moino:drivingDistance  288831.37934856815e0 ;
+                         moino:duration         "PT9134.0S"^^xsd:duration ;
+                         moino:route            "LINESTRING(8.586580000000001 53.551750000000006)"^^geo:wktLiteral ;
+                         moino:transportType    moino:car
+                       ] .
+
+<< moin:Dortmund moino:connectedTo moin:Karlsruhe >>
+'''
+
+# substitute leading << and trailing >> by < and > from urls
+lines = multiline_string.splitlines()
+moin_to_be_closed = False
+pattern_moino_connected_to = re.compile(r'(moino:connectedTo)\s+(moin:\w+)')
+pattern_for_closing_bracket = re.compile(r'\](?=\.)?$')
+for i in range(len(lines)):
+    if moin_to_be_closed and lines[i].strip() == 0:
+        lines[i - 1] = pattern_for_closing_bracket.sub(r']]', lines[i - 1])
+        moin_to_be_closed = False
+    elif lines[i].startswith(MOIN_PREFIX):
+        moin_to_be_closed = True
+        lines[i] = pattern_moino_connected_to.sub(r'\1 [ \1 \2', lines[i])
+ttl_file_content = "\n".join(lines)
+
+print(ttl_file_content)
+
+def test_datasource2_pipeline():
+    pass
