@@ -30,5 +30,5 @@ pd.options.display.max_colwidth = 100
 pd.options.display.max_columns = 20
 # dtype={'EVA_NR': int, 'DS100': str, 'IFOPT': str, 'NAME': str, 'Verkehr': str, 'Laenge': str, 'Breite': str, 'Betreiber_Name': str, 'Betreiber_Nr': int, 'Status': str}
 df = pd.read_csv(DATASOURCE_URL, sep=";")
-df = drop_invalid_rows(df)
+df = preprocess_data(df)
 store_dataframe_in_db(df, TABLE_NAME)
