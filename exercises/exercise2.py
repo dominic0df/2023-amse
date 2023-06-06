@@ -19,7 +19,7 @@ def preprocess_data(df):
     df = df[(df['Laenge'] >= -90) & (df['Laenge'] <= 90)]
     df = df[(df['Breite'] >= -90) & (df['Breite'] <= 90)]
     df = df.dropna()
-    pattern_for_ifopt = r'^\S{2}:\d+:\d+(?:\d+)?$'
+    pattern_for_ifopt = r'^[a-zA-Z]{2}:\d+:\d+(?::\d+)?$'
     df = df[df['IFOPT'].str.contains(pattern_for_ifopt)]
     df['Betreiber_Nr'] = df['Betreiber_Nr'].astype(int)
     return df
