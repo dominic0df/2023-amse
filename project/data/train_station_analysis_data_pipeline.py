@@ -80,10 +80,14 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
             print("ends with: ", lines[i - 1])
             lines[i - 1] = lines[i - 1].replace('] .', ']] .')
             moin_to_be_closed = False
-        elif stripped_line.startswith(MOIN_PREFIX + " " + MOINO_CONNECTED_TO) or stripped_line.startswith('<' + MOIN_URL_PREFIX + "> " + MOINO_CONNECTED_TO):
+        elif re.match("^" + MOIN_PREFIX + ".+ " + MOINO_CONNECTED_TO, stripped_line) or \
+                re.match('^<' + MOIN_URL_PREFIX + ".+> " + MOINO_CONNECTED_TO, stripped_line):
             print("starts with ", line)
             moin_to_be_closed = True
             lines[i] = line.replace(MOINO_CONNECTED_TO, MOINO_CONNECTED_TO + " [ " + MOINO_CONNECTED_TO)
+        elif i == len(lines) - 1:
+            print("last line")
+            lines[i] = line.replace('] .', ']] .')
         prev_line = line
     ttl_file_content = "\n".join(lines)
 
@@ -136,7 +140,7 @@ def rearrange_graph_to_origin_destination_trip_information_format(graph):
     query_origin_destination_trips = """
         SELECT ?source ?connectedTo ?duration ?transportType
         WHERE {
-          ?source moino:connectedTo [ ?connectedTo;
+          ?source moino:connectedTo [ moino:connectedTo ?connectedTo;
                   moino:hasTrip [
                     moino:duration ?duration ;
                     moino:transportType ?transportType
@@ -145,11 +149,11 @@ def rearrange_graph_to_origin_destination_trip_information_format(graph):
         ORDER BY ?source ?connectedTo
         """
 
-    # origin_destination_trips = graph.query(query_origin_destination_trips)
-    # for row in qres:
-    #    print(row)
+    origin_destination_trips = graph.query(query_origin_destination_trips)
+    for row in origin_destination_trips:
+        print(row)
     # print("len qres ", len(query_origin_destination_trips))
-    return graph
+    return origin_destination_trips
 
 
 def extract_transform_load_datasource1():
