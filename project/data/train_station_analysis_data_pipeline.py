@@ -10,25 +10,26 @@ import pickle
 import yaml
 import urllib.parse
 from xml.etree import ElementTree
-
-from rdfpandas.graph import to_dataframe
+from pandas import DataFrame
+from rdflib.plugins.sparql.processor import SPARQLResult
 from sqlalchemy import create_engine
 from retrying import retry
 from ratelimit import limits, RateLimitException
 
 # ttl file constants
 MOIN_PREFIX = "moin:"
-MOINO_CONNECTED_TO = "moino:connectedTo"
-MOIN_URL_PREFIX = "http://moin-project.org/data/"
+MOINO_CONNECTED_TO_PREFIX = "moino:connectedTo"
+MOIN_PREFIX_URI = "http://moin-project.org/data/"
+MOINO_PREFIX_URI = "http://moin-project.org/ontology/"
 FIRST_LINE_DEFAUL_PREFIX = "@prefix : <#> .\n"
 
 # namespaces
 MOIN_NAMESPACE = rdflib.Namespace("http://moin-project.org/data/")
-MOINO = rdflib.Namespace("http://moin-project.org/ontology/")
-SCHEMA = rdflib.Namespace("http://schema.org/")
-WD = rdflib.Namespace("http://www.wikidata.org/entity/")
-WDT = rdflib.Namespace("http://www.wikidata.org/prop/direct/")
-RDF_SCHEMA = rdflib.Namespace("http://www.w3.org/2000/01/rdf-schema/")
+MOINO_NAMESPACE = rdflib.Namespace("http://moin-project.org/ontology/")
+SCHEMA_NAMESPACE = rdflib.Namespace("http://schema.org/")
+WD_NAMESPACE = rdflib.Namespace("http://www.wikidata.org/entity/")
+WDT_NAMESPACE = rdflib.Namespace("http://www.wikidata.org/prop/direct/")
+RDF_SCHEMA_NAMESPACE = rdflib.Namespace("http://www.w3.org/2000/01/rdf-schema/")
 
 # other constants
 UTF8 = "UTF-8"
@@ -80,11 +81,12 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
             print("ends with: ", lines[i - 1])
             lines[i - 1] = lines[i - 1].replace('] .', ']] .')
             moin_to_be_closed = False
-        elif re.match("^" + MOIN_PREFIX + ".+ " + MOINO_CONNECTED_TO, stripped_line) or \
-                re.match('^<' + MOIN_URL_PREFIX + ".+> " + MOINO_CONNECTED_TO, stripped_line):
+        elif re.match("^" + MOIN_PREFIX + ".+ " + MOINO_CONNECTED_TO_PREFIX, stripped_line) or \
+                re.match('^<' + MOIN_PREFIX_URI + ".+> " + MOINO_CONNECTED_TO_PREFIX, stripped_line):
             print("starts with ", line)
             moin_to_be_closed = True
-            lines[i] = line.replace(MOINO_CONNECTED_TO, MOINO_CONNECTED_TO + " [ " + MOINO_CONNECTED_TO)
+            lines[i] = line.replace(MOINO_CONNECTED_TO_PREFIX,
+                                    MOINO_CONNECTED_TO_PREFIX + " [ " + MOINO_CONNECTED_TO_PREFIX)
         elif i == len(lines) - 1:
             print("last line")
             lines[i] = line.replace('] .', ']] .')
@@ -103,10 +105,10 @@ def parse_ttl_file_to_rdf_graph():
     # prefixes are still not loaded correctly - so the URIs are not correct
     graph = rdflib.Graph()
     graph.bind("moin", MOIN_NAMESPACE)
-    graph.bind("moino", MOINO)
-    graph.bind("schema", SCHEMA)
-    graph.bind("wdt", WDT)
-    graph.bind("wd", WD)
+    graph.bind("moino", MOINO_NAMESPACE)
+    graph.bind("schema", SCHEMA_NAMESPACE)
+    graph.bind("wdt", WDT_NAMESPACE)
+    graph.bind("wd", WD_NAMESPACE)
 
     with open(SCRIPT_DIR + "/dataset.ttl",
               'r', encoding=UTF8) as file:
@@ -131,7 +133,7 @@ def extract_towns_from_graph(graph):
     return subjects_that_represent_towns
 
 
-def rearrange_graph_to_origin_destination_trip_information_format(graph):
+def query_graph_for_origin_destination_trip_information(graph):
     # problem: the information of connectedTo and the information about hasTrip triples are not related
     # the only relation is the position in the ttl file, but this doesn´t help for the query
     # the query returns the cartesian product of moin:Bremerhaven moino:connectedTo ?connectedTo with all existing trips
@@ -150,31 +152,52 @@ def rearrange_graph_to_origin_destination_trip_information_format(graph):
         """
 
     origin_destination_trips = graph.query(query_origin_destination_trips)
-    for row in origin_destination_trips:
-        print(row)
-    # print("len qres ", len(query_origin_destination_trips))
     return origin_destination_trips
 
 
+def sparql_results_to_df(results: SPARQLResult) -> DataFrame:
+    """
+    Export results from an rdflib SPARQL query into a `pandas.DataFrame`,
+    using Python types. See https://github.com/RDFLib/rdflib/issues/1179.
+    """
+    return DataFrame(
+        data=([None if x is None else x.toPython() for x in row] for row in results),
+        columns=[str(x) for x in results.vars],
+    )
+
+
+def transform_ds1_df_data(ds1_df, towns):
+    ds1_df = ds1_df.rename(columns={'connectedTo': 'destination'})
+    ds1_df.loc[:, ["source", "destination"]] = ds1_df.loc[:, ["source", "destination"]].replace(MOIN_PREFIX_URI, "",
+                                                                                                regex=True)
+    ds1_df = ds1_df[ds1_df["source"].isin(towns)]
+    ds1_df = ds1_df[ds1_df["destination"].isin(towns)]
+    ds1_df["transportType"] = ds1_df["transportType"].replace(MOINO_PREFIX_URI, "", regex=True)
+    ds1_df["duration"] = pd.to_timedelta(ds1_df["duration"])
+    ds1_df["duration"] = ds1_df["duration"].dt.total_seconds().div(60).astype(int)
+    ds1_df.dropna()
+    return ds1_df
+
+
 def extract_transform_load_datasource1():
+    print("extract transform load datasource1")
     ds1_preprocessed = download_and_decompress_ds1_file()
     ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
     with open(SCRIPT_DIR + "/dataset.ttl",
               "w", encoding=UTF8) as file:
         file.write(ds1_preprocessed_ttl_content)
     print("ttl file extracted and ready for parsing")
-    # parse the ttl file to a pandas data frame
     ds1_graph = parse_ttl_file_to_rdf_graph()
     towns = extract_towns_from_graph(ds1_graph)
-    ds1_graph = rearrange_graph_to_origin_destination_trip_information_format(ds1_graph)
-    ds1_df = to_dataframe(ds1_graph)
-    # print("shape of ds1_df ", ds1_df.shape)
+    sparql_query_result = query_graph_for_origin_destination_trip_information(ds1_graph)
+    ds1_df = sparql_results_to_df(sparql_query_result)
+    print("connection graph queried and loaded to dataframe")
+    ds1_df = transform_ds1_df_data(ds1_df, towns)
     store_dataframe_in_db(ds1_df, 'connection_time_graph')
     print("information of datasource1 loaded to database")
     keys = ds1_df.keys()
-    print("keys: ", keys)
+    print("shape of dataset1: ", ds1_df.shape, ", keys: ", keys)
     print(ds1_df.head(2))
-    print("number of listed towns in dataset 1: ", len(towns))
 
 
 # DB API Service Plan: 60 requests per minute, 24/7 availability without support
@@ -245,6 +268,7 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
 
 
 def extract_transform_load_datasource2():
+    print("extract transform load datasource2")
     with open(os.getcwd() + '/towns.pkl', 'rb') as f:
         towns = pickle.load(f)
     subdomain_stations_all = '/station/*'
