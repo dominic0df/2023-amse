@@ -51,7 +51,7 @@ def download_and_decompress_ds1_file():
 
 # Note: the datasource1 file seems to be corrupted.
 # It is not parsable with rdflib without this preprocessing steps
-# As the file corrupted file is downloaded directly from the Internet, its corrupted content
+# As the corrupted file is downloaded directly from the Internet, its corrupted content
 # might change and the pipeline will fail
 
 # The cause for isodate.isoerror.ISO8601Error: Unrecognised ISO 8601 time format: '... 5 Min.:00' warnings is
@@ -101,7 +101,6 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
 
 
 def parse_ttl_file_to_rdf_graph():
-    # prefixes are still not loaded correctly - so the URIs are not correct
     graph = rdflib.Graph()
     graph.bind("moin", MOIN_NAMESPACE)
     graph.bind("moino", MOINO_NAMESPACE)
@@ -133,11 +132,6 @@ def extract_towns_from_graph(graph):
 
 
 def query_graph_for_origin_destination_trip_information(graph):
-    # problem: the information of connectedTo and the information about hasTrip triples are not related
-    # the only relation is the position in the ttl file, but this doesn´t help for the query
-    # the query returns the cartesian product of moin:Bremerhaven moino:connectedTo ?connectedTo with all existing trips
-    # as the triples moin:Bremerhaven moino:connectedTo ?connectedTo; and moin:Bremerhaven moino:hasTrip [...]
-    # have no relation except moin:Bremerhaven
     query_origin_destination_trips = """
         SELECT ?source ?connectedTo ?duration ?transportType
         WHERE {
@@ -305,13 +299,10 @@ def extract_transform_load_datasource2():
     ds2_df = transform_ds2_df_data(ds2_df)
     store_dataframe_in_db(ds2_df, 'timetable_for_stations')
     print("information of datasource 2 loaded to database")
-    # print("shape of ds2_df ", ds2_df.shape)
     print(ds2_df.head(2))
 
 
 # actual script
-pd.options.display.max_colwidth = 100
-pd.options.display.max_columns = 20
 
 extract_transform_load_datasource1()
 extract_transform_load_datasource2()
