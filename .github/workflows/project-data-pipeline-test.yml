@@ -22,7 +22,9 @@ jobs:
       with:
         python-version: 3.11
     - name: Install Python dependencies
-      run: python -m pip install -r ./main/project/requirements.txt
+      uses: py-actions/py-dependency-install@v4
+      with:
+        path: "./main/project/requirements.txt"
 
     # Run exercise feedback
     - name: Automated Test for the Project Automated Data Pipeline
