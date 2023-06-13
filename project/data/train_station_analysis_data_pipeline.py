@@ -49,13 +49,17 @@ def download_and_decompress_ds1_file():
     return ds1_decompressed
 
 
-# Note: the datasource1 file seems to be corrupted.
-# It is not parsable with rdflib without this preprocessing steps
-# As the corrupted file is downloaded directly from the Internet, its corrupted content
-# might change and the pipeline will fail
+"""
+Note: the datasource1 file seems to be corrupted.
+It is not parsable with rdflib without this preprocessing steps
+As the corrupted file is downloaded directly from the Internet, its corrupted content
+might change and the pipeline will fail
 
-# The cause for isodate.isoerror.ISO8601Error: Unrecognised ISO 8601 time format: '... 5 Min.:00' warnings is
-# that in the ttl file, some time formats are corrupted
+The cause for isodate.isoerror.ISO8601Error: Unrecognised ISO 8601 time format: '... 5 Min.:00' warnings is
+that in the ttl file, some time formats are corrupted
+"""
+
+
 def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
     print("started preprocessing ttl file")
 
