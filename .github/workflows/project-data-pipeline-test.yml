@@ -1,0 +1,24 @@
+name: Automated Test for the Project Automated Data Pipeline
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - project/**
+
+jobs:
+  project-data-pipeline-test:
+    runs-on: ubuntu-latest
+    steps:
+    
+    # Install python
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    # Run exercise feedback
+    - name: Exercise feedback
+      run: |
+        ./project/test/tests.sh
