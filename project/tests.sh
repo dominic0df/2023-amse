@@ -3,8 +3,10 @@
 
 pwd
 ls -la
-
-python train_station_analysis_data_pipeline.py
+cd main
+ls -la
+cd ..
+python main/train_station_analysis_data_pipeline.py
 
 set DB_FILE="data/train_connection_analysis.sqlite"
 set TIMETABLE_FOR_STATIONS=timetable_for_stations
