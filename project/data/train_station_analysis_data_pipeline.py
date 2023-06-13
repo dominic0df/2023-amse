@@ -273,7 +273,7 @@ def create_ds2_df_by_api_call(towns_with_eva_numbers):
         subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + towns_with_eva_numbers[town]
         db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
         if db_api_station_eva_number_response:
-            xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.decode("utf-8"), xpath='.//s/m')
+            xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.decode(UTF8), xpath='.//s/m')
             xml_df_of_response = xml_df_of_response.assign(train_station=town)
             xml_dfs.append(xml_df_of_response)
 
