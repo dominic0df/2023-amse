@@ -23,6 +23,6 @@ jobs:
         python-version: 3.11
 
     # Run exercise feedback
-    - name: Exercise feedback
+    - name: Automated Test for the Project Automated Data Pipeline
       run: |
         ./main/project/test/tests.sh
