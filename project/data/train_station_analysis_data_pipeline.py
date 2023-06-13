@@ -282,9 +282,6 @@ def create_ds2_df_by_api_call(towns_with_eva_numbers):
 
 
 def transform_ds2_df_data(df):
-    print(df.shape)
-    print(df.keys())
-    print(df.head(2))
     df = df.rename(
         columns={'from': 'from_time', 'to': 'to_time', 'cat': 'category', 'pr': 'priority', 't': 'message_type',
                  'ts': 'timestamp'})
