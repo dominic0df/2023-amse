@@ -25,4 +25,4 @@ jobs:
     # Run exercise feedback
     - name: Automated Test for the Project Automated Data Pipeline
       run: |
-        ./main/project/test/tests.sh
+        ./main/project/tests.sh
