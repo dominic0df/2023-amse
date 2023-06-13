@@ -306,7 +306,5 @@ def extract_transform_load_datasource2():
     print(ds2_df.head(2))
 
 
-# actual script
-
 extract_transform_load_datasource1()
 extract_transform_load_datasource2()
