@@ -6,6 +6,9 @@ set DB_FILE="../data/train_connection_analysis.sqlite"
 set TIMETABLE_FOR_STATIONS=timetable_for_stations
 set CONNECTION_TIME_GRAPH=connection_time_graph
 
+pwd
+ls -la
+
 # Check if 'timetable_for_stations' table of datasource2 exists
 if [-f DB_FILE], then
     if sqlite3 "$DB_FILE" "SELECT name FROM sqlite_master WHERE type='table' AND name='timetable_for_stations';" >/dev/null 2>&1; then
