@@ -10,7 +10,7 @@ pwd
 ls -la
 
 # Check if 'timetable_for_stations' table of datasource2 exists
-if [-f DB_FILE], then
+if [-f DB_FILE]; then
     if sqlite3 "$DB_FILE" "SELECT name FROM sqlite_master WHERE type='table' AND name='timetable_for_stations';" >/dev/null 2>&1; then
         echo "The 'timetable_for_stations' table exists."
     else
