@@ -81,12 +81,10 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
     for i, line in enumerate(lines):
         stripped_line = line.strip()
         if moin_to_be_closed and prev_line.strip() == '] .':
-            print("ends with: ", lines[i - 1])
             lines[i - 1] = lines[i - 1].replace('] .', ']] .')
             moin_to_be_closed = False
         elif re.match("^" + MOIN_PREFIX + ".+ " + MOINO_CONNECTED_TO_PREFIX, stripped_line) or \
                 re.match('^<' + MOIN_PREFIX_URI + ".+> " + MOINO_CONNECTED_TO_PREFIX, stripped_line):
-            print("starts with ", line)
             moin_to_be_closed = True
             lines[i] = line.replace(MOINO_CONNECTED_TO_PREFIX,
                                     MOINO_CONNECTED_TO_PREFIX + " [ " + MOINO_CONNECTED_TO_PREFIX)
