@@ -20,7 +20,7 @@ To access data from Datasource2 a ClientId and ClientSecret for the DB Timetable
 4. Copy the credentials and store them secretly (especially the API key!)
 
 If you have a ClientId and ClientSecret, do the following:
-1. In the `/data` folder, create a new file called `auth.yml`.
+1. In the `/project` folder, create a new file called `auth.yml`.
 2. Paste the following content into the `auth.yml` file: 
     ```
     auth:

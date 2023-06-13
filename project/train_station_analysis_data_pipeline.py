@@ -112,7 +112,7 @@ def parse_ttl_file_to_rdf_graph():
     graph.bind("wdt", WDT_NAMESPACE)
     graph.bind("wd", WD_NAMESPACE)
 
-    with open(SCRIPT_DIR + "/dataset.ttl",
+    with open(SCRIPT_DIR + "/data/dataset.ttl",
               'r', encoding=UTF8) as file:
         graph.parse(file, format='turtle')
     print("graph was parsed successfully")
@@ -130,7 +130,7 @@ def extract_towns_from_graph(graph):
     print("number of listed towns in the dataset: ", len(subjects_that_represent_towns))
 
     # store towns separately for usage as input for the other dataset
-    with open(SCRIPT_DIR + '/towns.pkl', 'wb') as f:
+    with open(SCRIPT_DIR + '/data/towns.pkl', 'wb') as f:
         pickle.dump(subjects_that_represent_towns, f)
     return subjects_that_represent_towns
 
@@ -180,7 +180,7 @@ def extract_transform_load_datasource1():
     print("extract transform load datasource1")
     ds1_preprocessed = download_and_decompress_ds1_file()
     ds1_preprocessed_ttl_content = preprocess_to_a_valid_parsable_ttl_file(ds1_preprocessed)
-    with open(SCRIPT_DIR + "/dataset.ttl",
+    with open(SCRIPT_DIR + "/data/dataset.ttl",
               "w", encoding=UTF8) as file:
         file.write(ds1_preprocessed_ttl_content)
     print("ttl file extracted and ready for parsing")
@@ -293,7 +293,7 @@ def transform_ds2_df_data(df):
 
 def extract_transform_load_datasource2():
     print("extract transform load datasource2")
-    with open(os.getcwd() + '/towns.pkl', 'rb') as f:
+    with open(SCRIPT_DIR + '/data/towns.pkl', 'rb') as f:
         towns = pickle.load(f)
     subdomain_stations_all = '/station/*'
     db_api_stations_all_response = call_db_api(subdomain_stations_all)
