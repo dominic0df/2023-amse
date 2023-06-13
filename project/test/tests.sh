@@ -1,8 +1,8 @@
 #!/bin/bash
 
-python ../data/train_station_analysis_data_pipeline.py
+python main/data/train_station_analysis_data_pipeline.py
 
-set DB_FILE="../data/train_connection_analysis.sqlite"
+set DB_FILE="main/data/train_connection_analysis.sqlite"
 set TIMETABLE_FOR_STATIONS=timetable_for_stations
 set CONNECTION_TIME_GRAPH=connection_time_graph
 
