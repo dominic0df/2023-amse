@@ -1,5 +1,4 @@
 import time
-
 import pandas as pd
 import requests
 import os
@@ -166,17 +165,17 @@ def sparql_results_to_df(results: SPARQLResult) -> DataFrame:
     )
 
 
-def transform_ds1_df_data(ds1_df, towns):
-    ds1_df = ds1_df.rename(columns={'connectedTo': 'destination'})
-    ds1_df.loc[:, ["source", "destination"]] = ds1_df.loc[:, ["source", "destination"]].replace(MOIN_PREFIX_URI, "",
-                                                                                                regex=True)
-    ds1_df = ds1_df[ds1_df["source"].isin(towns)]
-    ds1_df = ds1_df[ds1_df["destination"].isin(towns)]
-    ds1_df["transportType"] = ds1_df["transportType"].replace(MOINO_PREFIX_URI, "", regex=True)
-    ds1_df["duration"] = pd.to_timedelta(ds1_df["duration"])
-    ds1_df["duration"] = ds1_df["duration"].dt.total_seconds().div(60).astype(int)
-    ds1_df.dropna()
-    return ds1_df
+def transform_ds1_df_data(df, towns):
+    df = df.rename(columns={'connectedTo': 'destination'})
+    df.loc[:, ["source", "destination"]] = df.loc[:, ["source", "destination"]].replace(MOIN_PREFIX_URI, "",
+                                                                                        regex=True)
+    df = df[df["source"].isin(towns)]
+    df = df[df["destination"].isin(towns)]
+    df["transportType"] = df["transportType"].replace(MOINO_PREFIX_URI, "", regex=True)
+    df["duration"] = pd.to_timedelta(df["duration"])
+    df["duration"] = df["duration"].dt.total_seconds().div(60).astype(int)
+    df.dropna()
+    return df
 
 
 def extract_transform_load_datasource1():
@@ -236,7 +235,7 @@ def call_db_api(subdomain):
 
     while True:
         try:
-            return make_api_call(url, headers)
+            return make_api_call(url, headers).content
         except RateLimitException:
             print("too many api calls - sleep for 60 seconds")
             time.sleep(60)
@@ -267,6 +266,36 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
     return stations_and_its_eva_numbers
 
 
+def create_ds2_df_by_api_call(towns_with_eva_numbers):
+    xml_dfs = []
+    subdomain_timetable_changes = "/fchg/"
+    for town in towns_with_eva_numbers:
+        subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + towns_with_eva_numbers[town]
+        db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
+        if db_api_station_eva_number_response:
+            xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.decode("utf-8"), xpath='.//s/m')
+            xml_df_of_response = xml_df_of_response.assign(train_station=town)
+            xml_dfs.append(xml_df_of_response)
+
+    ds2_df = pd.concat(xml_dfs, ignore_index=True)
+    return ds2_df
+
+
+def transform_ds2_df_data(df):
+    print(df.shape)
+    print(df.keys())
+    print(df.head(2))
+    df = df.rename(
+        columns={'from': 'from_time', 'to': 'to_time', 'cat': 'category', 'pr': 'priority', 't': 'message_type',
+                 'ts': 'timestamp'})
+    df = df.drop(['ts-tts'], axis=1)
+    # df["duration"] = (pd.to_timedelta(df["to_time"]).dt.total_seconds() - pd.to_timedelta(
+    #    df["from_time"]).dt.total_seconds()).div(60).fillna(0).astype(int)
+    # df["from_time"] = pd.to_datetime(df["from_time"])
+    # df["to_time"] = pd.to_datetime(df["to_time"])
+    return df
+
+
 def extract_transform_load_datasource2():
     print("extract transform load datasource2")
     with open(os.getcwd() + '/towns.pkl', 'rb') as f:
@@ -274,34 +303,13 @@ def extract_transform_load_datasource2():
     subdomain_stations_all = '/station/*'
     db_api_stations_all_response = call_db_api(subdomain_stations_all)
     towns_with_eva_numbers = extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(towns,
-                                                                                                        db_api_stations_all_response.content)
-    xml_dfs = []
-    subdomain_timetable_changes = "/fchg/"
-    for eva_number in towns_with_eva_numbers.values():
-        subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + eva_number
-        db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
-        xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.content, xpath='.//s/m')
-        xml_dfs.append(xml_df_of_response)
-        # print(xml_df_of_response.shape)
-    ds2_df = pd.concat(xml_dfs, keys=towns_with_eva_numbers.keys())
+                                                                                                        db_api_stations_all_response)
+    ds2_df = create_ds2_df_by_api_call(towns_with_eva_numbers)
+    ds2_df = transform_ds2_df_data(ds2_df)
     store_dataframe_in_db(ds2_df, 'timetable_for_stations')
     print("information of datasource 2 loaded to database")
     # print("shape of ds2_df ", ds2_df.shape)
     print(ds2_df.head(2))
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=600)
-def download_ds3_file_and_load_to_df():
-    datasource3_url = "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-kreis-neuss-ladesaulen-in-deutschland/exports/json"
-    ds3_df = pd.read_csv(datasource3_url)
-    return ds3_df
-
-
-# experimental
-def extract_transform_load_datasource3():
-    ds3_df = download_ds3_file_and_load_to_df()
-    print(ds3_df.head())
-    store_dataframe_in_db(ds3_df, 'e_car_charging_stations')
 
 
 # actual script
@@ -310,8 +318,3 @@ pd.options.display.max_columns = 20
 
 extract_transform_load_datasource1()
 extract_transform_load_datasource2()
-
-# extract_transform_load_datasource3()
-# datasource3_url = "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-kreis-neuss-ladesaulen-in-deutschland/exports/json"
-# ds3_df = pd.read_csv(datasource3_url)
-# ds3_df.head(2)
