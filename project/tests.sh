@@ -12,6 +12,9 @@ set DB_FILE="main/project/data/train_connection_analysis.sqlite"
 set TIMETABLE_FOR_STATIONS=timetable_for_stations
 set CONNECTION_TIME_GRAPH=connection_time_graph
 
+cd main/project
+ls -la
+
 # Check if DB file exists
 if [ -f DB_FILE ]; then
     # Check if 'timetable_for_stations' table of datasource2 exists
