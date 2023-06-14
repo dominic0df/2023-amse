@@ -36,7 +36,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def store_dataframe_in_db(dataframe, table_description):
-    engine = create_engine('sqlite:///data/train_connection_analysis.sqlite')
+    engine = create_engine('sqlite:///' + SCRIPT_DIR + '/data/train_connection_analysis.sqlite')
     dataframe.to_sql(table_description, con=engine, if_exists='replace')
 
 
@@ -89,7 +89,6 @@ def preprocess_to_a_valid_parsable_ttl_file(ttl_file_content):
             lines[i] = line.replace(MOINO_CONNECTED_TO_PREFIX,
                                     MOINO_CONNECTED_TO_PREFIX + " [ " + MOINO_CONNECTED_TO_PREFIX)
         elif i == len(lines) - 1:
-            print("last line")
             lines[i] = line.replace('] .', ']] .')
         prev_line = line
     ttl_file_content = "\n".join(lines)
