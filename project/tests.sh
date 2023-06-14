@@ -16,8 +16,6 @@ if [ -e main/project/data/train_connection_analysis.sqlite ]; then
         echo "The 'timetable_for_stations' table exists."
     else
         # For calling the DB API an API Key and Client ID is required. Therefore a file auth.yml is required that includes this information
-        # The timetable_for_stations query will be always false in GitHub Actions as this file cannot be provided,
-        # so parts of the pipeline fail as credentials are missing
         echo "The 'timetable_for_stations' table does not exist."
     fi
 
