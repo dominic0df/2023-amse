@@ -36,7 +36,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def store_dataframe_in_db(dataframe, table_description):
-    engine = create_engine('sqlite:///train_connection_analysis.sqlite')
+    engine = create_engine('sqlite:///data/train_connection_analysis.sqlite')
     dataframe.to_sql(table_description, con=engine, if_exists='replace')
 
 
