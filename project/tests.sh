@@ -9,7 +9,8 @@ set TIMETABLE_FOR_STATIONS=timetable_for_stations
 set CONNECTION_TIME_GRAPH=connection_time_graph
 
 # Check if DB file exists
-if [ -e data/train_connection_analysis.sqlite ]; then
+# remove main/project/ from path to run script locally, this additional path is required for executing the pipeline with GitHub Actions
+if [ -e main/project/data/train_connection_analysis.sqlite ]; then
     # Check if 'timetable_for_stations' table of datasource2 exists
     if sqlite3 "$DB_FILE" "SELECT name FROM sqlite_master WHERE type='table' AND name='timetable_for_stations';"; then
         echo "The 'timetable_for_stations' table exists."
