@@ -55,7 +55,7 @@ pipeline CarsPipeline {
     }
 
     block CarsTableInterpreter oftype TableInterpreter {
-        header: true;
+        header: false;
         columns: [
             "date" oftype text,
             "CIN" oftype CIN,
@@ -72,6 +72,6 @@ pipeline CarsPipeline {
 
     block CarsLoader oftype SQLiteLoader {
         table: "cars";
-        file: "cars.sqlite";
+        file: "./cars.sqlite";
     }
 }
