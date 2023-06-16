@@ -72,6 +72,6 @@ pipeline CarsPipeline {
 
     block CarsLoader oftype SQLiteLoader {
         table: "cars";
-        file: "./cars.sqlite";
+        file: "cars.sqlite";
     }
 }
