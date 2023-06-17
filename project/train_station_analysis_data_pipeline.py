@@ -1,4 +1,6 @@
 import time
+
+import numpy as np
 import pandas as pd
 import requests
 import os
@@ -263,16 +265,23 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
 
 def create_ds2_df_by_api_call(towns_with_eva_numbers):
     xml_dfs = []
+    stations_without_problems = []
     subdomain_timetable_changes = "/fchg/"
     for town in towns_with_eva_numbers:
         subdomain_timetable_changes_for_eva_number = subdomain_timetable_changes + towns_with_eva_numbers[town]
         db_api_station_eva_number_response = call_db_api(subdomain_timetable_changes_for_eva_number)
         if db_api_station_eva_number_response:
-            xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.decode(UTF8), xpath='.//s/m')
-            xml_df_of_response = xml_df_of_response.assign(train_station=town)
-            xml_dfs.append(xml_df_of_response)
+            try:
+                xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.decode(UTF8), xpath='.//s/m')
+                xml_df_of_response = xml_df_of_response.assign(train_station=town, problems_found=True)
+                xml_dfs.append(xml_df_of_response)
+            except ValueError:
+                stations_without_problems.append(town)
 
     ds2_df = pd.concat(xml_dfs, ignore_index=True)
+    stations_to_insert = pd.DataFrame({"train_station": stations_without_problems, "problems_found": False})
+    ds2_df = pd.concat([ds2_df, stations_to_insert], ignore_index=True)
+    ds2_df = ds2_df.fillna(np.NaN)
     return ds2_df
 
 
