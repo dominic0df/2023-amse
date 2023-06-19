@@ -4,7 +4,8 @@ pipeline CarsPipeline {
         -> CarsTextFileInterpreter
         -> CarsTextRangeSelector
         -> CarsCSVInterpreter
-        -> CarsColumnDeleter
+        //-> CarsColumnDeleter
+        -> AbcCellNameWriter -> MCellWriter -> WCellWriter -> AGCellWriter -> AQCellWriter ->BACellWriter -> BKCellWriter -> BUCellWriter
         -> CarsTableInterpreter
         -> CarsLoader;
 
@@ -14,6 +15,7 @@ pipeline CarsPipeline {
     }
 
     block CarsTextFileInterpreter oftype TextFileInterpreter {
+        encoding: "iso-8859-1";
 
     }
 
@@ -26,12 +28,56 @@ pipeline CarsPipeline {
         delimiter: ";";
     }
 
-    block CarsColumnDeleter oftype ColumnDeleter {
-        delete: [column D, column E, column F, column Q, column H, column I, column J, column K, column L, column N, column O, column P, column Q, column R, column S, column T, column U, column V, column X, column Y, column Z, 
-        column AA, column AB, column AC, column AD, column AE, column AF, column AH, column AI, column AJ, column AK, column AL, column AM, column AN, column AO, column AP, column AR, column AS, column AT, column AU, column AV, column AW, column AX, column AY, column AZ, 
-        column BB, column BC, column BD, column BE, column BF, column BQ, column BH, column BI, column BJ, column BL, column BM, column BM, column BQ, column BR, column BS, column BT, column BV, column BW, column BX, column BY, column BZ, 
-        column CA, column CB, column CC, column CD, column CE];
+
+    // i think this solution is better than deleting all columns manually
+    // but its still ugly. Other ways?
+    block AbcCellNameWriter oftype CellWriter {
+        at: range A1:C1;
+        write: ["date", "CIN", "name"];
     }
+
+    block MCellWriter oftype CellWriter {
+        at: cell M1;
+        write: ["petrol"];
+    }
+
+    block WCellWriter oftype CellWriter {
+        at: cell W1;
+        write: ["diesel"];
+    }
+
+    block AGCellWriter oftype CellWriter { 
+        at: cell AG1; 
+        write: ["gas"];
+    }
+
+    block AQCellWriter oftype CellWriter { 
+        at: cell AQ1; 
+        write: ["electro"];
+    }
+
+    block BACellWriter oftype CellWriter {
+         at: cell BA1; 
+         write: ["hybrid"];
+    }
+
+    block BKCellWriter oftype CellWriter { 
+        at: cell BK1; 
+        write: ["plugInHybrid"];
+    }
+
+    block BUCellWriter oftype CellWriter { 
+        at: cell BU1; 
+        write: ["others"];
+    }
+
+
+    // block CarsColumnDeleter oftype ColumnDeleter {
+    //    delete: [column D, column E, column F, column Q, column H, column I, column J, column K, column L, column N, column O, column P, column Q, column R, column S, column T, column U, column V, column X, column Y, column Z, 
+    //    column AA, column AB, column AC, column AD, column AE, column AF, column AH, column AI, column AJ, column AK, column AL, column AM, column AN, column AO, column AP, column AR, column AS, column AT, column AU, column AV, column AW, column AX, column AY, column AZ, 
+    //    column BB, column BC, column BD, column BE, column BF, column BQ, column BH, column BI, column BJ, column BL, column BM, column BM, column BQ, column BR, column BS, column BT, column BV, column BW, column BX, column BY, column BZ, 
+    //    column CA, column CB, column CC, column CD, column CE];
+    //}
 
     valuetype CIN oftype text {
         constraints: [
