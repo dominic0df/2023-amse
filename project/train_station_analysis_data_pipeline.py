@@ -37,15 +37,16 @@ UTF8 = "UTF-8"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def store_dataframe_in_db(dataframe, table_description):
+def store_dataframe_in_db(dataframe, table_description, exist_strategy):
     engine = create_engine('sqlite:///' + SCRIPT_DIR + '/data/train_connection_analysis.sqlite')
-    dataframe.to_sql(table_description, con=engine, if_exists='replace')
+    dataframe.to_sql(table_description, con=engine, if_exists=exist_strategy)
 
 
 @retry(stop_max_attempt_number=3, wait_fixed=600)
 def download_and_decompress_ds1_file():
     datasource1_url = "https://mobilithek.info/mdp-api/files/aux/573356838940979200/moin-2022-05-02.1-20220502.131229-1.ttl.bz2"
     ds1_response = requests.get(datasource1_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    # hard to detect which encoding is used, utf8 seems to make no problems except for some German umlauts. The problem remains for iso-8859-1
     ds1_decompressed = bz2.decompress(ds1_response.content).decode(UTF8)
     print("data downloaded and decompressed")
     return ds1_decompressed
@@ -189,7 +190,7 @@ def extract_transform_load_datasource1():
     ds1_df = sparql_results_to_df(sparql_query_result)
     print("connection graph queried and loaded to dataframe")
     ds1_df = transform_ds1_df_data(ds1_df, towns)
-    store_dataframe_in_db(ds1_df, 'connection_time_graph')
+    store_dataframe_in_db(ds1_df, 'connection_time_graph', 'replace')
     print("information of datasource1 loaded to database")
     keys = ds1_df.keys()
     print("shape of dataset1: ", ds1_df.shape, ", keys: ", keys)
@@ -257,10 +258,22 @@ def extract_eva_numbers_from_stations_of_towns_that_are_also_part_of_the_graph(t
     """
     the stations that are not found have special names that can not be differentiated easily from stations we are not interested in.
     F.e. Ratingen Ost is not found as the station of Ratingen, searching for Ost would also result in other <town Ost> stations.
-    The project could be extended to multiple stations of a town, but we will see. 
+    To correlate both datasets completely these view stations are added manually
     """
     print("towns from graph that were not found as stations ", not_in_list)
-    return stations_and_its_eva_numbers
+    stations_with_eva_numbers_that_could_not_be_correlated = {"Zwickau": '8010397', "Offenbach am Main": '8000349',
+                                                              "Salzgitter": '8005265', "Villingen-Schwenningen": '8000366',
+                                                              "Velbert": '8006064', "Ludwigshafen am Rhein": '8000236',
+                                                              "Minden": '8000252', "Leverkusen": '8006713',
+                                                              "Freiburg im Breisgau": '8000107', "Ratingen": '8004948',
+                                                              "Sterkrade": '8004542', "Marl": '8003888',
+                                                              "Bergisch Gladbach": '8000899',
+                                                              "Frankfurt am Main": '8000105', "Oldenburg": '8000291',
+                                                              "Halle (Saale)": '8010159', "Hamm": '8000149',
+                                                              "Esslingen am Neckar": '8001920',
+                                                              "Mülheim an der Ruhr": '8000259', "Fürth": '8000114',
+                                                              "Münster": '8000263', "Dessau": '8010077'}
+    return dict(stations_and_its_eva_numbers, **stations_with_eva_numbers_that_could_not_be_correlated)
 
 
 def create_ds2_df_by_api_call(towns_with_eva_numbers):
@@ -290,10 +303,6 @@ def transform_ds2_df_data(df):
         columns={'from': 'from_time', 'to': 'to_time', 'cat': 'category', 'pr': 'priority', 't': 'message_type',
                  'ts': 'timestamp'})
     df = df.drop(['ts-tts'], axis=1)
-    # df["duration"] = (pd.to_timedelta(df["to_time"]).dt.total_seconds() - pd.to_timedelta(
-    #    df["from_time"]).dt.total_seconds()).div(60).fillna(0).astype(int)
-    # df["from_time"] = pd.to_datetime(df["from_time"])
-    # df["to_time"] = pd.to_datetime(df["to_time"])
     return df
 
 
@@ -307,7 +316,7 @@ def extract_transform_load_datasource2():
                                                                                                         db_api_stations_all_response)
     ds2_df = create_ds2_df_by_api_call(towns_with_eva_numbers)
     ds2_df = transform_ds2_df_data(ds2_df)
-    store_dataframe_in_db(ds2_df, 'timetable_for_stations')
+    store_dataframe_in_db(ds2_df, 'timetable_for_stations', 'append')
     print("information of datasource 2 loaded to database")
     print(ds2_df.head(2))
 
