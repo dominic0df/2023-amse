@@ -288,7 +288,7 @@ def create_ds2_df_by_api_call(towns_with_eva_numbers):
                 xml_df_of_response = pd.read_xml(db_api_station_eva_number_response.decode(UTF8), xpath='.//s/m')
                 xml_df_of_response = xml_df_of_response.assign(train_station=town, problems_found=True)
                 xml_dfs.append(xml_df_of_response)
-            except ValueError:
+            except Exception:
                 stations_without_problems.append(town)
 
     ds2_df = pd.concat(xml_dfs, ignore_index=True)
