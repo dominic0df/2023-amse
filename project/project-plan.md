@@ -26,7 +26,7 @@ RDF (Star) knowledge graph with connection durations between the 100 most populo
 * Data URL: https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/
 * Data Type: API - application/xml
 
-API for passenger information for train stations operated by DB Station&Service AG. The API provides the data hourly. My idea is to call the API more or less hourly and then store not all but certain data (features I am interessted in) in a storage.
+API for passenger information for train stations operated by DB Station&Service AG. The API provides the data hourly.
 
 ## Work Packages
 
