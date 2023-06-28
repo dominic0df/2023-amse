@@ -14582,15 +14582,15 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <h1 id="Report:-State-of-train-mobility-in-Germany">Report: State of train mobility in Germany<a class="anchor-link" href="#Report:-State-of-train-mobility-in-Germany">&#182;</a></h1><p>This report aims to analyze the current state of train mobility in Germany. Hereby we like to focus on the following two questions:</p>
 <ul>
 <li>Where is the expansion or improvement of existing rail connections worth prioritising?</li>
-<li>Where is already good train infrastructure / where are train station working and where should improvements be made fastly? </li>
+<li>Where are train stations not working properly, where should improvements be made fastly? </li>
 </ul>
 <p>For this purpose, connection times between different cities with different means of transport are analysed in this report. Secondly, an attempt is made to identify bootlenecks at train stations via a Deutsche Bahn timetable API.</p>
 <p>The structure of this report is as follows:</p>
 <ol>
-<li><a href="#introduction">Introduction</a></li>
-<li><a href="#Analysis-of-dataset-1-connection-times-between-german-towns">Analysis of Dataset 1: Connection Times between German towns</a></li>
-<li><a href="#Analysis-of-dataset-2-delay-causes-for-specific-train-stations">Analysis of Dataset 2: Delay causes for specific train stations</a></li>
-<li><a href="#summary">Summary</a></li>
+<li>Introduction</li>
+<li>Analysis of Dataset 1: Connection Times between German towns]</li>
+<li>Analysis of Dataset 2: Delay causes for specific train stations]</li>
+<li>Conclusion</li>
 </ol>
 <p>This report is based on open data from two different datasources:</p>
 <h3 id="Datasource-1">Datasource 1<a class="anchor-link" href="#Datasource-1">&#182;</a></h3><p>Datasource 1 holds a graph with the connection times between the biggest towns in Germany by different means of transport.</p>
@@ -14632,7 +14632,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">pip</span> install pandas
@@ -14661,13 +14661,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Requirement already satisfied: pandas in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (2.0.2)
-Requirement already satisfied: numpy&gt;=1.21.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (1.23.3)
-Requirement already satisfied: python-dateutil&gt;=2.8.2 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (2.8.2)
-Requirement already satisfied: tzdata&gt;=2022.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (2023.3)
-Requirement already satisfied: pytz&gt;=2020.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (2022.4)
-Requirement already satisfied: six&gt;=1.5 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from python-dateutil&gt;=2.8.2-&gt;pandas) (1.16.0)
-Note: you may need to restart the kernel to use updated packages.
+<pre>Note: you may need to restart the kernel to use updated packages.
 </pre>
 </div>
 </div>
@@ -14693,7 +14687,13 @@ Note: you may need to restart the kernel to use updated packages.
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Requirement already satisfied: plotly in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (5.15.0)
+<pre>Requirement already satisfied: pandas in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (2.0.2)
+Requirement already satisfied: pytz&gt;=2020.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (2022.4)
+Requirement already satisfied: python-dateutil&gt;=2.8.2 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (2.8.2)
+Requirement already satisfied: numpy&gt;=1.21.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (1.23.3)
+Requirement already satisfied: tzdata&gt;=2022.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from pandas) (2023.3)
+Requirement already satisfied: six&gt;=1.5 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from python-dateutil&gt;=2.8.2-&gt;pandas) (1.16.0)
+Requirement already satisfied: plotly in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (5.15.0)
 Requirement already satisfied: tenacity&gt;=6.2.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from plotly) (8.2.2)
 Requirement already satisfied: packaging in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from plotly) (21.3)
 Requirement already satisfied: pyparsing!=3.0.5,&gt;=2.0.2 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from packaging-&gt;plotly) (3.0.9)
@@ -14723,9 +14723,9 @@ Note: you may need to restart the kernel to use updated packages.
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Requirement already satisfied: SQLAlchemy in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (1.4.39)
+<pre>Note: you may need to restart the kernel to use updated packages.
+Requirement already satisfied: SQLAlchemy in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (1.4.39)
 Requirement already satisfied: greenlet!=0.4.17 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from SQLAlchemy) (2.0.2)
-Note: you may need to restart the kernel to use updated packages.
 </pre>
 </div>
 </div>
@@ -14752,9 +14752,9 @@ Note: you may need to restart the kernel to use updated packages.
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Requirement already satisfied: nbformat in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (5.9.0)
-Requirement already satisfied: traitlets&gt;=5.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from nbformat) (5.9.0)
 Requirement already satisfied: fastjsonschema in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from nbformat) (2.17.1)
 Requirement already satisfied: jsonschema&gt;=2.6 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from nbformat) (4.17.3)
+Requirement already satisfied: traitlets&gt;=5.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from nbformat) (5.9.0)
 Requirement already satisfied: jupyter-core in c:\users\dominic\appdata\roaming\python\python310\site-packages (from nbformat) (5.3.0)
 Requirement already satisfied: pyrsistent!=0.17.0,!=0.17.1,!=0.17.2,&gt;=0.14.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from jsonschema&gt;=2.6-&gt;nbformat) (0.19.3)
 Requirement already satisfied: attrs&gt;=17.4.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from jsonschema&gt;=2.6-&gt;nbformat) (23.1.0)
@@ -14787,38 +14787,38 @@ Note: you may need to restart the kernel to use updated packages.
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Requirement already satisfied: ipywidgets in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (8.0.6)
-Requirement already satisfied: traitlets&gt;=4.3.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets) (5.9.0)
-Requirement already satisfied: jupyterlab-widgets~=3.0.7 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets) (3.0.7)
 Requirement already satisfied: widgetsnbextension~=4.0.7 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets) (4.0.7)
-Requirement already satisfied: ipykernel&gt;=4.5.1 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipywidgets) (6.23.1)
+Requirement already satisfied: traitlets&gt;=4.3.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets) (5.9.0)
 Requirement already satisfied: ipython&gt;=6.1.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets) (8.13.2)
-Requirement already satisfied: jupyter-client&gt;=6.1.12 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (8.2.0)
+Requirement already satisfied: ipykernel&gt;=4.5.1 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipywidgets) (6.23.1)
+Requirement already satisfied: jupyterlab-widgets~=3.0.7 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipywidgets) (3.0.7)
+Requirement already satisfied: nest-asyncio in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (1.5.6)
 Requirement already satisfied: comm&gt;=0.1.1 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (0.1.3)
-Requirement already satisfied: debugpy&gt;=1.6.5 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (1.6.7)
-Requirement already satisfied: packaging in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (21.3)
 Requirement already satisfied: matplotlib-inline&gt;=0.1 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (0.1.6)
-Requirement already satisfied: pyzmq&gt;=20 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (25.1.0)
-Requirement already satisfied: tornado&gt;=6.1 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (6.3.2)
 Requirement already satisfied: jupyter-core!=5.0.*,&gt;=4.12 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (5.3.0)
 Requirement already satisfied: psutil in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (5.9.5)
-Requirement already satisfied: nest-asyncio in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (1.5.6)
-Requirement already satisfied: stack-data in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.6.2)
+Requirement already satisfied: jupyter-client&gt;=6.1.12 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (8.2.0)
+Requirement already satisfied: packaging in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (21.3)
+Requirement already satisfied: pyzmq&gt;=20 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (25.1.0)
+Requirement already satisfied: debugpy&gt;=1.6.5 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (1.6.7)
+Requirement already satisfied: tornado&gt;=6.1 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from ipykernel&gt;=4.5.1-&gt;ipywidgets) (6.3.2)
 Requirement already satisfied: pygments&gt;=2.4.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (2.15.1)
-Requirement already satisfied: prompt-toolkit!=3.0.37,&lt;3.1.0,&gt;=3.0.30 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (3.0.38)
 Requirement already satisfied: pickleshare in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.7.5)
-Requirement already satisfied: backcall in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.2.0)
-Requirement already satisfied: jedi&gt;=0.16 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.18.2)
+Requirement already satisfied: prompt-toolkit!=3.0.37,&lt;3.1.0,&gt;=3.0.30 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (3.0.38)
 Requirement already satisfied: colorama in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.4.5)
+Requirement already satisfied: jedi&gt;=0.16 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.18.2)
+Requirement already satisfied: stack-data in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.6.2)
+Requirement already satisfied: backcall in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (0.2.0)
 Requirement already satisfied: decorator in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from ipython&gt;=6.1.0-&gt;ipywidgets) (5.1.1)
 Requirement already satisfied: parso&lt;0.9.0,&gt;=0.8.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from jedi&gt;=0.16-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (0.8.3)
 Requirement already satisfied: python-dateutil&gt;=2.8.2 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from jupyter-client&gt;=6.1.12-&gt;ipykernel&gt;=4.5.1-&gt;ipywidgets) (2.8.2)
-Requirement already satisfied: pywin32&gt;=300 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from jupyter-core!=5.0.*,&gt;=4.12-&gt;ipykernel&gt;=4.5.1-&gt;ipywidgets) (306)
 Requirement already satisfied: platformdirs&gt;=2.5 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from jupyter-core!=5.0.*,&gt;=4.12-&gt;ipykernel&gt;=4.5.1-&gt;ipywidgets) (3.5.3)
+Requirement already satisfied: pywin32&gt;=300 in c:\users\dominic\appdata\roaming\python\python310\site-packages (from jupyter-core!=5.0.*,&gt;=4.12-&gt;ipykernel&gt;=4.5.1-&gt;ipywidgets) (306)
 Requirement already satisfied: wcwidth in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from prompt-toolkit!=3.0.37,&lt;3.1.0,&gt;=3.0.30-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (0.2.6)
 Requirement already satisfied: pyparsing!=3.0.5,&gt;=2.0.2 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from packaging-&gt;ipykernel&gt;=4.5.1-&gt;ipywidgets) (3.0.9)
-Requirement already satisfied: asttokens&gt;=2.1.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from stack-data-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (2.2.1)
 Requirement already satisfied: executing&gt;=1.2.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from stack-data-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (1.2.0)
 Requirement already satisfied: pure-eval in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from stack-data-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (0.2.2)
+Requirement already satisfied: asttokens&gt;=2.1.0 in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from stack-data-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (2.2.1)
 Requirement already satisfied: six in c:\users\dominic\appdata\local\programs\python\python310\lib\site-packages (from asttokens&gt;=2.1.0-&gt;stack-data-&gt;ipython&gt;=6.1.0-&gt;ipywidgets) (1.16.0)
 Note: you may need to restart the kernel to use updated packages.
 </pre>
@@ -14860,7 +14860,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -14905,7 +14905,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ds2_df</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
@@ -14978,7 +14978,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[51]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
 
 
 
@@ -15073,7 +15073,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">ipywidgets</span> <span class="k">as</span> <span class="nn">widgets</span>
@@ -15160,7 +15160,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[53]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Select the train connections, group the trains connections by &#39;source&#39; and &#39;destination&#39; and calculate the median and minimum duration</span>
@@ -15232,7 +15232,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[54]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">connection_times_df</span><span class="p">[</span><span class="s2">&quot;diff_car_median_train_duration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connection_times_df</span><span class="p">[</span><span class="s2">&quot;car_duration&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">connection_times_df</span><span class="p">[</span><span class="s2">&quot;median_train_duration&quot;</span><span class="p">]</span>
@@ -15293,7 +15293,7 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[55]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># remember, we calculated the sources and destinations list for the dropbox earlier</span>
@@ -15394,7 +15394,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[56]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">min_train_faster</span> <span class="o">=</span> <span class="n">connection_times_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">)[</span><span class="s2">&quot;diff_car_min_train_duration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">diff_car_min_train_duration</span><span class="p">:</span> <span class="p">(</span><span class="n">diff_car_min_train_duration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;min_train_faster&quot;</span><span class="p">)</span>
@@ -15425,7 +15425,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[57]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">town_ranking</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;min_train_faster&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -15490,7 +15490,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[58]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">town_ranking</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;median_train_faster&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -15556,7 +15556,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[59]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ds2_df</span> <span class="o">=</span> <span class="n">ds2_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;message_type&quot;</span><span class="p">,</span> <span class="s2">&quot;from_time&quot;</span><span class="p">,</span> <span class="s2">&quot;to_time&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">,</span> <span class="s2">&quot;train_station&quot;</span><span class="p">,</span> <span class="s2">&quot;problems_found&quot;</span><span class="p">,</span> <span class="s2">&quot;del&quot;</span><span class="p">])</span>
@@ -15630,7 +15630,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[59]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 
 
 
@@ -15724,7 +15724,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[60]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">delay_causes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
@@ -15776,7 +15776,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[61]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -15829,7 +15829,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;from_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;from_time&quot;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
@@ -15860,7 +15860,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">stations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;train_station&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
@@ -15947,7 +15947,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">interference_metrics_of_stations</span> <span class="o">=</span> <span class="n">ds2_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;train_station&#39;</span><span class="p">,</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;priority&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="s1">&#39;size&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
@@ -15970,7 +15970,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[64]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
 
 
 
@@ -16135,7 +16135,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">interference_metrics_of_stations</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">interference_metrics_of_stations</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">],</span> <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Großstörung&#39;</span><span class="p">,</span> <span class="s1">&#39;Störung&#39;</span><span class="p">,</span> <span class="s1">&#39;Bauarbeiten&#39;</span><span class="p">,</span> <span class="s1">&#39;Information&#39;</span><span class="p">],</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -16211,7 +16211,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">interference_metrics_of_stations</span><span class="p">[</span><span class="n">interference_metrics_of_stations</span><span class="p">[</span><span class="s2">&quot;train_station&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Hannover Hbf&quot;</span><span class="p">])</span>
@@ -16298,7 +16298,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[67]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">short_lasting_interferences</span> <span class="o">=</span> <span class="n">ds2_df</span><span class="p">[(</span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ds2_df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span><span class="o">!=</span><span class="s2">&quot;Großstörung&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;train_station&#39;</span><span class="p">,</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;priority&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="s1">&#39;size&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
@@ -16329,7 +16329,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[68]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">short_lasting_interferences</span> <span class="o">=</span> <span class="n">short_lasting_interferences</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;total_interferences&quot;</span><span class="p">,</span> <span class="s2">&quot;average_duration&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
@@ -16351,7 +16351,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[68]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[20]:</div>
 
 
 
@@ -16502,7 +16502,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[69]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">short_lasting_interferences</span> <span class="o">=</span> <span class="n">short_lasting_interferences</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">,</span> <span class="s2">&quot;total_interferences&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
@@ -16524,7 +16524,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[69]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[21]:</div>
 
 
 
@@ -16686,7 +16686,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">short_lasting_interferences</span> <span class="o">=</span> <span class="n">short_lasting_interferences</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;total_duration&quot;</span><span class="p">,</span> <span class="s2">&quot;total_interferences&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
@@ -16708,7 +16708,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[70]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
 
 
 
@@ -16860,7 +16860,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>In this last chapter we summarize our results by presenting our findings again. Furthermore we also like to indicate on which major assumptions these findings are based. Then we briefly sum up the most difficult problems tackled in the project. Finally we give an outlook how the project can be extended and how the certainty of the results can be further improved.</p>
+<h2 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion">&#182;</a></h2><p>In this last chapter we summarize our results by presenting our findings again. Furthermore we also like to indicate on which major assumptions these findings are based. Then we briefly sum up the most difficult problems tackled in the project. Finally we give an outlook how the project can be extended and how the certainty of the results can be further improved.</p>
 <h3 id="Findings">Findings<a class="anchor-link" href="#Findings">&#182;</a></h3><h4 id="Dataset-1">Dataset 1<a class="anchor-link" href="#Dataset-1">&#182;</a></h4><p>For Dataset 1 we analyzed the connection times between the towns in the dataset and brought car connection times in relation to train connection times.</p>
 <p>Therefore we compared for each town all outgoing connection times. We compared:</p>
 <ul>
@@ -16868,12 +16868,11 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <li><em>the median train connection time</em> (the median of all train connection times for a connection) with the corresponding <em>car connection time</em></li>
 </ul>
 <p>We then created a ranking by a counter.</p>
-<p>'''
-    for town in towns:
+
+<pre><code>    for town in towns:
         for all outgoing connections of town to other towns:
             if train connection faster than car connection
-                increase counter
-'''</p>
+                increase counter</code></pre>
 <p>Based on this we created two rankings:</p>
 <ul>
 <li>Towns sorted by the number of outgoing connections where the <strong>fastest</strong> train connection is faster than the car connection</li>
@@ -16892,7 +16891,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[71]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">town_ranking</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;median_train_faster&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -16974,7 +16973,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[72]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">short_lasting_interferences</span> <span class="o">=</span> <span class="n">short_lasting_interferences</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;total_duration&quot;</span><span class="p">,</span> <span class="s2">&quot;total_interferences&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
@@ -16996,7 +16995,7 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[72]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[24]:</div>
 
 
 
@@ -17163,12 +17162,24 @@ The median train connection from Erlangen to Berlin is 72.0 minutes faster than 
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Final export as html</p>
+
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>jupyter nbconvert --to html report.ipynb
