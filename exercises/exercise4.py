@@ -19,15 +19,11 @@ def store_dataframe_in_db(dataframe, table_name):
 
 
 csv_file = ZipFile(io.BytesIO(urlopen(DATASOURCE_URL).read()))
-df = pd.read_csv(csv_file.open(CSV_FILE_NAME), sep=";", on_bad_lines='skip')
+df = pd.read_csv(csv_file.open(CSV_FILE_NAME), sep=";", decimal=',', on_bad_lines='skip', usecols=["Geraet", "Hersteller", "Model", "Monat", "Temperatur in °C (DWD)", "Batterietemperatur in °C", "Geraet aktiv"])
 print(df.head(2))
-df = df[
-    ["Geraet", "Hersteller", "Model", "Monat", "Temperatur in °C (DWD)", "Batterietemperatur in °C", "Geraet aktiv"]]
 df = df.rename(columns={"Temperatur in °C (DWD)": "Temperatur", "Batterietemperatur in °C": "Batterietemperatur"})
-df["Temperatur"] = df["Temperatur"].astype(str).str.replace(',', '.').astype(float)
 df["Temperatur"] = df["Temperatur"].apply(map_celsius_to_fahrenheit)
-df["Batterietemperatur"] = df["Batterietemperatur"].astype(str).str.replace(',', '.').astype(float)
 df["Batterietemperatur"] = df["Batterietemperatur"].apply(map_celsius_to_fahrenheit)
 df = df[df["Geraet"].astype(str).str.isdigit() & df["Geraet"] > 0]
-print(df.head(2))
+print(df["Temperatur"])
 store_dataframe_in_db(df, TABLE_NAME)
