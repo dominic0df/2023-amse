@@ -2,7 +2,7 @@ import zipfile
 
 import pandas as pd
 from urllib.request import urlretrieve
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, types
 
 DATASOURCE_URL = "https://www.mowesta.com/data/measure/mowesta-dataset-20221107.zip"
 ZIP_FILE_NAME = "data.zip"
@@ -11,6 +11,7 @@ TABLE_NAME = "temperatures"
 COLUMNS = ["Geraet", "Hersteller", "Model", "Monat", "Temperatur in °C (DWD)",
            "Batterietemperatur in °C", "Geraet aktiv"]
 CUSTOM_COLUMN_NAMES_MAP = {"Temperatur in °C (DWD)": "Temperatur", "Batterietemperatur in °C": "Batterietemperatur"}
+DATA_TYPES_FOR_DB = dtypes = {'Geraet': types.INTEGER, 'Hersteller': types.TEXT, 'Model': types.TEXT, 'Monat': types.INTEGER, 'Temperatur': types.FLOAT, 'Batterietemperatur': types.FLOAT, 'Geraet aktiv': types.TEXT}
 
 
 def extract_data():
@@ -28,21 +29,19 @@ def map_celsius_to_fahrenheit(temperature_in_celsius):
 
 def validate(df):
     df = df[df["Geraet"] > 0]
-    df = df[df["Monat"] > 0]
+    df = df[(0 < df["Monat"]) & (df["Monat"] < 13)]
+    df = df[df['Geraet aktiv'].isin(['Ja', 'Nein'])]
     return df
 
 
 def store_dataframe_in_db(dataframe, table_name):
     engine = create_engine('sqlite:///temperatures.sqlite')
-    dataframe.to_sql(table_name, con=engine, if_exists='replace')
+    dataframe.to_sql(table_name, con=engine, if_exists='replace', dtype=DATA_TYPES_FOR_DB)
 
 
 df = extract_data()
-df = df.dropna()
 df = df.rename(columns=CUSTOM_COLUMN_NAMES_MAP)
 df["Temperatur"] = df["Temperatur"].apply(map_celsius_to_fahrenheit)
 df["Batterietemperatur"] = df["Batterietemperatur"].apply(map_celsius_to_fahrenheit)
-# df = validate(df)
+df = validate(df)
 store_dataframe_in_db(df, TABLE_NAME)
-print(df.info)
-print(df.dtypes)
