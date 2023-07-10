@@ -43,7 +43,7 @@ pipeline StopsPipeline {
         ];
     }
 
-    valuetype GeographicCoordinate oftype integer {
+    valuetype GeographicCoordinate oftype decimal {
         constraints: [
             IntervalOfCoordinates
         ];
@@ -66,6 +66,7 @@ pipeline StopsPipeline {
             "zone_id" oftype Zone2001Id,
         ];
     }
+    
 
     block StopsLoader oftype SQLiteLoader {
         table: "stops";
