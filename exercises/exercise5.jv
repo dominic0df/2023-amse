@@ -22,12 +22,12 @@ pipeline StopsPipeline {
     }
 
     block StopsTextFileInterpreter oftype TextFileInterpreter {
-        encoding: "iso-8859-1";
-
+    
     }
 
     block StopsCSVInterpreter oftype CSVInterpreter {
-        delimiter: ",";
+        enclosing: '"'; 
+		enclosingEscape: '"';
     }
 
     constraint AllowedStops oftype RangeConstraint {
@@ -57,7 +57,7 @@ pipeline StopsPipeline {
     }
 
     block StopsTableInterpreter oftype TableInterpreter {
-        header: false;
+        header: true;
         columns: [
             "stop_id" oftype integer,
             "stop_name" oftype text,
@@ -66,7 +66,7 @@ pipeline StopsPipeline {
             "zone_id" oftype Zone2001Id,
         ];
     }
-    
+
 
     block StopsLoader oftype SQLiteLoader {
         table: "stops";
